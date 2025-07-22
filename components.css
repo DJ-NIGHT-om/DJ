@@ -331,7 +331,7 @@ input:focus, textarea:focus {
     color: white;
     cursor: pointer;
     font-size: 0.9rem;
-    padding: 8px 15px;
+    padding: var(--modal-button-padding, 0.4rem 0.8rem);
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
@@ -532,12 +532,12 @@ input:focus, textarea:focus {
 }
 
 .modal-buttons button {
-    flex: 1;
-    min-width: 100px;
-    padding: 0.6rem 1rem;
+    flex: 0 1 auto; /* Changed from flex: 1 to prevent buttons from stretching */
+    min-width: var(--modal-button-min-width, 100px);
+    padding: var(--modal-button-padding, 0.5rem 1rem);
     border: 2px solid var(--primary-color);
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: var(--modal-button-font-size, 0.9rem);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;

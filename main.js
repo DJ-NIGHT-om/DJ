@@ -16,6 +16,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        const room = new WebsimSocket();
+
         /* @tweakable The maximum year allowed for the event date. */
         const maxEventYear = 9999;
         
@@ -92,6 +94,66 @@
         }
 
         var dom = window.getDOMElements();
+
+        /**
+         * Logo upload and persistence logic
+         */
+        const logoContainer = document.getElementById('logo-container');
+        const logoImg = document.getElementById('app-logo');
+        const logoUploadInput = document.getElementById('logo-upload');
+
+        if (logoContainer && logoUploadInput && logoImg) {
+            logoContainer.addEventListener('click', () => {
+                logoUploadInput.click();
+            });
+
+            logoUploadInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Basic validation for image type
+                if (!file.type.startsWith('image/')) {
+                    window.showAlert('الرجاء اختيار ملف صورة صالح.');
+                    return;
+                }
+
+                window.showLoading(true);
+                try {
+                    const imageUrl = await window.websim.upload(file);
+                    
+                    // Persist the logo URL
+                    const logoRecords = room.collection('app_config').filter({ config_id: 'app_logo' }).getList();
+                    if (logoRecords.length > 0) {
+                        const logoRecord = logoRecords[0];
+                        await room.collection('app_config').update(logoRecord.id, { url: imageUrl });
+                    } else {
+                        await room.collection('app_config').create({ config_id: 'app_logo', url: imageUrl });
+                    }
+
+                    // The subscription below will handle updating the image src
+                    window.showAlert('تم تحديث الشعار بنجاح.');
+
+                } catch (error) {
+                    console.error('Error uploading logo:', error);
+                    window.showAlert('حدث خطأ أثناء رفع الشعار. الرجاء المحاولة مرة أخرى.');
+                } finally {
+                    window.showLoading(false);
+                    // Reset file input to allow re-uploading the same file
+                    logoUploadInput.value = '';
+                }
+            });
+        }
+
+        // Subscribe to logo changes
+        room.collection('app_config').filter({ config_id: 'app_logo' }).subscribe((logoRecords) => {
+            if (logoImg) {
+                if (logoRecords.length > 0 && logoRecords[0].url) {
+                    logoImg.src = logoRecords[0].url;
+                } else {
+                    logoImg.src = 'logo.png'; // Fallback to default
+                }
+            }
+        });
 
         /**
          * Checks if the selected date is already booked.
