@@ -529,14 +529,13 @@ input:focus, textarea:focus {
     gap: 1rem;
     justify-content: center;
     flex-wrap: wrap;
-  font-size: 1.20rem ;
 }
 
 .modal-buttons button {
     flex: 0 1 auto; /* Changed from flex: 1 to prevent buttons from stretching */
-    min-width: var(--modal-button-min-width, 50px);
+    min-width: var(--modal-button-min-width, 100px);
     padding: var(--modal-button-padding, 0.5rem 1rem);
-    border: 1px solid var(--primary-color);
+    border: 2px solid var(--primary-color);
     border-radius: 4px;
     font-size: var(--modal-button-font-size, 0.9rem);
     font-weight: bold;
@@ -546,21 +545,18 @@ input:focus, textarea:focus {
     letter-spacing: normal;
     position: relative;
     overflow: visible;
-  
 }
 
 .modal-buttons .submit-btn {
     background: var(--primary-color);
     color: white;
     box-shadow: none;
-    font-size: 1.20rem ;
 }
 
 .modal-buttons .submit-btn:hover {
     background: #3a7bc8;
     transform: none;
     box-shadow: none;
-  
 }
 
 .modal-buttons .cancel-btn {
@@ -568,14 +564,12 @@ input:focus, textarea:focus {
     color: var(--text-color);
     border-color: var(--light-text-color);
     box-shadow: none;
-    font-size: 1.20rem ;
 }
 
 .modal-buttons .cancel-btn:hover {
     background: #f5f5f5;
     transform: none;
     box-shadow: none;
-  
 }
 
 #modal-form-content {
