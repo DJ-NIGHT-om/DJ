@@ -76,8 +76,46 @@
         });
     }
 
+    /**
+     * Toggles highlighting of songs in a playlist card.
+     * @param {HTMLElement} card - The playlist card element to highlight.
+     */
+    function toggleSongHighlight(card) {
+        // Remove highlighting from all other cards first
+        var allCards = document.querySelectorAll('.playlist-card');
+        for (var i = 0; i < allCards.length; i++) {
+            if (allCards[i] !== card) {
+                allCards[i].classList.remove('selected');
+                var songItems = allCards[i].querySelectorAll('.playlist-songs li');
+                for (var j = 0; j < songItems.length; j++) {
+                    songItems[j].classList.remove('song-highlighted');
+                }
+            }
+        }
+
+        // Toggle highlighting for the clicked card
+        var isCurrentlySelected = card.classList.contains('selected');
+        if (isCurrentlySelected) {
+            card.classList.remove('selected');
+            var songItems = card.querySelectorAll('.playlist-songs li');
+            for (var k = 0; k < songItems.length; k++) {
+                songItems[k].classList.remove('song-highlighted');
+            }
+        } else {
+            card.classList.add('selected');
+            var songItems = card.querySelectorAll('.playlist-songs li');
+            for (var k = 0; k < songItems.length; k++) {
+                songItems[k].classList.add('song-highlighted');
+            }
+            
+            // Force reflow to ensure icon colors are applied immediately
+            card.offsetHeight;
+        }
+    }
+
     // Make functions globally accessible
     window.createPlaylistCard = createPlaylistCard;
     window.renderPlaylists = renderPlaylists;
+    window.toggleSongHighlight = toggleSongHighlight;
 
 })();

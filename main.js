@@ -94,7 +94,7 @@
         var dom = window.getDOMElements();
 
         /**
-         * Checks if the selected date is already booked.
+         * Checks if the selected date is in the past or already booked.
          */
         function checkDateAvailability() {
             var selectedDateValue = dom.eventDateInput.value;
@@ -103,11 +103,22 @@
                 return;
             }
 
+            var selectedDate = new Date(selectedDateValue);
+            var today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+
+            // Create a date object that isn't affected by timezone for comparison
+            var selectedDateUTC = new Date(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate());
+
+            if (selectedDateUTC < today) {
+                window.updateDateAvailabilityMessage('past');
+                return;
+            }
+            
             var allSheetData = window.getAllSheetData() || [];
             var editingId = dom.playlistIdInput.value;
             var isBooked = false;
             
-            var selectedDate = new Date(selectedDateValue);
             // Adjust for timezone to compare dates correctly
             selectedDate.setMinutes(selectedDate.getMinutes() + selectedDate.getTimezoneOffset());
             var selectedDateString = selectedDate.toISOString().split('T')[0];

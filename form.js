@@ -26,6 +26,8 @@
     const dateAvailableMessage = "التاريخ غير محجوز لحد الأن";
     /* @tweakable Message for when the date is booked */
     const dateBookedMessage = "للأسف التاريخ محجوز";
+    /* @tweakable Message for when a past date is entered */
+    const dateInPastMessage = "أدخلت تاريخاً قديماً";
 
     /**
      * Disables or enables form fields, except for the date input.
@@ -68,7 +70,7 @@
 
     /**
      * Updates the date availability message below the date input.
-     * @param {boolean|null} isAvailable - true if available, false if booked, null to hide.
+     * @param {boolean|null|string} isAvailable - true if available, false if booked, 'past' if in the past, null to hide.
      */
     function updateDateAvailabilityMessage(isAvailable) {
         var dom = window.getDOMElements();
@@ -79,6 +81,11 @@
             dom.dateAvailabilityMessage.textContent = '';
             dom.dateAvailabilityMessage.style.display = 'none';
             setFormFieldsDisabled(false); // Enable fields
+        } else if (isAvailable === 'past') {
+            dom.dateAvailabilityMessage.className = 'availability-message booked';
+            dom.dateAvailabilityMessage.textContent = dateInPastMessage;
+            dom.dateAvailabilityMessage.style.display = 'block';
+            setFormFieldsDisabled(true); // Disable fields
         } else if (isAvailable) {
             dom.dateAvailabilityMessage.className = 'availability-message available';
             dom.dateAvailabilityMessage.textContent = dateAvailableMessage;

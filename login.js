@@ -103,7 +103,7 @@
                     return;
                 }
 
-                showLoading(true);
+                window.showLoading(true);
                 
                 authenticateUser(username, password)
                     .then(function(result) {
@@ -126,7 +126,7 @@
                         window.showAlert('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
                     })
                     .finally(function() {
-                        showLoading(false);
+                        window.showLoading(false);
                     });
             });
         }
@@ -162,7 +162,7 @@
                     return;
                 }
 
-                showLoading(true);
+                window.showLoading(true);
                 
                 registerUser(username, password)
                     .then(function(result) {
@@ -182,7 +182,7 @@
                         window.showAlert('حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.');
                     })
                     .finally(function() {
-                        showLoading(false);
+                        window.showLoading(false);
                     });
             });
         }
@@ -211,7 +211,7 @@
                     return;
                 }
 
-                showLoading(true);
+                window.showLoading(true);
                 
                 resetPassword(username, newPassword)
                     .then(function(result) {
@@ -230,7 +230,7 @@
                         window.showAlert('حدث خطأ أثناء إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى.');
                     })
                     .finally(function() {
-                        showLoading(false);
+                        window.showLoading(false);
                     });
             });
         }
@@ -245,6 +245,6 @@
         }
 
         // Initial setup
-        showLoading(false);
+        window.showLoading(false);
     });
 })();

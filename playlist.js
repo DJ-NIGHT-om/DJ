@@ -133,7 +133,7 @@
             }
         } else if (!isDeleteButton && !isEditButton) {
             // Clicked on the card itself (not on action buttons)
-            toggleSongHighlight(card);
+            window.toggleSongHighlight(card);
         }
     }
 
