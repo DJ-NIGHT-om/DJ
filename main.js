@@ -182,6 +182,18 @@
             dom.eventDateInput.addEventListener('change', function() {
                 window.updateDayNameDisplay(window.getDOMElements().eventDateInput, window.getDOMElements().dayNameDisplay);
             });
+            
+            /* @tweakable The offset in days from today for the minimum selectable date. 0 makes today the earliest, -1 allows yesterday. */
+            const minDateOffset = 0;
+            const today = new Date();
+            today.setDate(today.getDate() + minDateOffset);
+            // Format date to YYYY-MM-DD for the min attribute
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const minDateString = `${yyyy}-${mm}-${dd}`;
+            
+            dom.eventDateInput.min = minDateString;
         }
 
         // --- Event Listeners ---
