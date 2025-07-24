@@ -67,12 +67,12 @@ header h1 {
 
 .header-logo {
     /* @tweakable size of the header logo */
-    width: 100px;
+    width: 80px;
     /* @tweakable size of the header logo */
-    height: 100px;
+    height: 80px;
     border-radius: 50%;
     /* @tweakable The space between the logo and the title text */
-    margin-left: 35px;
+    margin-left: 25px;
 }
 
 header h1 .fa-magic-wand-sparkles {
