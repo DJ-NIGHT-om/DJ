@@ -16,6 +16,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        /* @tweakable Whether to disable the right-click context menu. */
+        const disableContextMenu = true;
+        if (disableContextMenu) {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+
         var loginForm = document.getElementById('login-form');
         var registerForm = document.getElementById('register-form');
         var resetForm = document.getElementById('reset-form');

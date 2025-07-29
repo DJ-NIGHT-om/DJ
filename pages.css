@@ -40,6 +40,19 @@
     color: var(--primary-color);
     font-size: 2rem;
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-logo {
+    /* @tweakable The size of the logo on the login page */
+    width: 60px;
+    /* @tweakable The size of the logo on the login page */
+    height: 60px;
+    border-radius: 50%;
+    /* @tweakable The space between the logo and the title on the login page */
+    margin-left: 15px;
 }
 
 .login-header p {

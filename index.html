@@ -1,6 +1,6 @@
 <html lang="ar" dir="rtl">
 <head>
-     <link rel="icon" href="logo1.png" type="image/png">
+ <link rel="icon" href="logo1.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="pages.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
     
     <!-- Browser Compatibility Polyfills -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=fetch,Promise,Object.assign,Array.from"></script>
@@ -73,7 +75,7 @@
                     <div class="form-group">
                         <label for="eventDate"><i class="fas fa-calendar-alt icon"></i> تاريخ المناسبة</label>
                         <div class="date-input-container">
-                            <input type="date" id="eventDate" required max="9999-12-31">
+                            <input type="text" id="eventDate" required placeholder="DD/MM/YYYY" readonly="readonly">
                             <span id="dayName" class="day-name-display"></span>
                         </div>
                         <div id="date-availability-message" class="availability-message"></div>
@@ -134,6 +136,8 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/ar.js"></script>
     <script src="config.js" defer></script>
     <script src="modal.js" defer></script>
     <script src="api.js" defer></script>

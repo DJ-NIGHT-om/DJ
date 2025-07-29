@@ -16,6 +16,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        /* @tweakable Whether to disable the right-click context menu. */
+        const disableContextMenu = true;
+        if (disableContextMenu) {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+
         // Check if user is logged in
         var currentUser = localStorage.getItem('currentUser');
         if (!currentUser) {

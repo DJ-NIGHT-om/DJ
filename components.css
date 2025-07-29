@@ -101,6 +101,12 @@ input:focus, textarea:focus {
   
 }
 
+/* Style for readonly inputs to indicate they are not for typing */
+input[readonly] {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
 .form-buttons {
     display: flex;
     gap: 0.8rem;
@@ -175,7 +181,9 @@ input:focus, textarea:focus {
 #playlist-section {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    /* @tweakable The spacing between playlist cards */
     gap: 1.5rem;
+    align-items: start;
   
 }
 

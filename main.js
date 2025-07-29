@@ -16,6 +16,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        /* @tweakable Whether to disable the right-click context menu. */
+        const disableContextMenu = true;
+        if (disableContextMenu) {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+        }
+
         /* @tweakable The maximum year allowed for the event date. */
         const maxEventYear = 9999;
         
@@ -93,6 +101,42 @@
 
         var dom = window.getDOMElements();
 
+        // Initialize Flatpickr
+        if (dom.eventDateInput) {
+             /* @tweakable The theme for the date picker calendar. See https://flatpickr.js.org/themes/ for options. */
+            const datePickerTheme = 'material_blue';
+            // Dynamically load theme
+            const themeLink = document.createElement('link');
+            themeLink.rel = 'stylesheet';
+            themeLink.href = `https://npmcdn.com/flatpickr/dist/themes/${datePickerTheme}.css`;
+            document.head.appendChild(themeLink);
+
+            const fp = flatpickr(dom.eventDateInput, {
+                dateFormat: "d/m/Y",
+                /* @tweakable The locale for the date picker (e.g., 'ar' for Arabic). */
+                locale: "ar",
+                minDate: "today",
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        checkDateAvailability();
+                        window.updateDayNameDisplay(selectedDates[0]);
+                    } else {
+                        // Handle date clearing
+                        window.updateDayNameDisplay(null);
+                        window.updateDateAvailabilityMessage(null);
+                    }
+                },
+                onClose: function(selectedDates, dateStr, instance) {
+                    // Re-validate when closed, in case a date was typed manually
+                    if (selectedDates.length > 0) {
+                        checkDateAvailability();
+                    }
+                }
+            });
+            // Store instance on the element for access from other modules
+            dom.eventDateInput._flatpickr = fp;
+        }
+
         /**
          * Checks if the selected date is in the past or already booked.
          */
@@ -103,14 +147,17 @@
                 return;
             }
 
-            var selectedDate = new Date(selectedDateValue);
+            var selectedDates = dom.eventDateInput._flatpickr.selectedDates;
+            if (selectedDates.length === 0) {
+                window.updateDateAvailabilityMessage(null);
+                return;
+            }
+            var selectedDate = selectedDates[0];
+
             var today = new Date();
             today.setHours(0, 0, 0, 0); // Set to start of today for comparison
 
-            // Create a date object that isn't affected by timezone for comparison
-            var selectedDateUTC = new Date(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate());
-
-            if (selectedDateUTC < today) {
+            if (selectedDate < today) {
                 window.updateDateAvailabilityMessage('past');
                 return;
             }
@@ -118,10 +165,9 @@
             var allSheetData = window.getAllSheetData() || [];
             var editingId = dom.playlistIdInput.value;
             var isBooked = false;
-            
-            // Adjust for timezone to compare dates correctly
-            selectedDate.setMinutes(selectedDate.getMinutes() + selectedDate.getTimezoneOffset());
-            var selectedDateString = selectedDate.toISOString().split('T')[0];
+
+            // Use UTC methods to compare dates without timezone issues
+            var selectedDateString = `${selectedDate.getUTCFullYear()}-${selectedDate.getUTCMonth()}-${selectedDate.getUTCDate()}`;
 
             for (var i = 0; i < allSheetData.length; i++) {
                 var playlist = allSheetData[i];
@@ -133,8 +179,7 @@
                 }
                 
                 var playlistDate = new Date(playlist.date);
-                playlistDate.setMinutes(playlistDate.getMinutes() + playlistDate.getTimezoneOffset());
-                var playlistDateString = playlistDate.toISOString().split('T')[0];
+                var playlistDateString = `${playlistDate.getUTCFullYear()}-${playlistDate.getUTCMonth()}-${playlistDate.getUTCDate()}`;
                 
                 if (playlistDateString === selectedDateString) {
                     isBooked = true;
@@ -174,26 +219,6 @@
                 // Remove any non-digit characters
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
             });
-        }
-
-        if (dom.eventDateInput) {
-            dom.eventDateInput.max = `${maxEventYear}-12-31`;
-            dom.eventDateInput.addEventListener('change', checkDateAvailability);
-            dom.eventDateInput.addEventListener('change', function() {
-                window.updateDayNameDisplay(window.getDOMElements().eventDateInput, window.getDOMElements().dayNameDisplay);
-            });
-            
-            /* @tweakable The offset in days from today for the minimum selectable date. 0 makes today the earliest, -1 allows yesterday. */
-            const minDateOffset = 0;
-            const today = new Date();
-            today.setDate(today.getDate() + minDateOffset);
-            // Format date to YYYY-MM-DD for the min attribute
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const minDateString = `${yyyy}-${mm}-${dd}`;
-            
-            dom.eventDateInput.min = minDateString;
         }
 
         // --- Event Listeners ---
