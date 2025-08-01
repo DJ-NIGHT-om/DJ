@@ -37,7 +37,8 @@
             dom.eventLocationInput,
             dom.phoneNumberInput,
             dom.brideZaffaInput,
-            dom.groomZaffaInput
+            dom.groomZaffaInput,
+            dom.notesInput
         ];
 
         inputsToToggle.forEach(input => {
@@ -203,6 +204,7 @@
         dom.playlistForm.reset();
         dom.songsContainer.innerHTML = '';
         dom.playlistIdInput.value = '';
+        if (dom.notesInput) dom.notesInput.value = '';
         dom.formTitle.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة قائمة جديدة';
         dom.saveBtn.textContent = 'حفظ البيانات';
         
@@ -249,6 +251,10 @@
         dom.brideZaffaInput.value = playlist.brideZaffa;
         dom.groomZaffaInput.value = playlist.groomZaffa;
         
+        if (dom.notesInput) {
+            dom.notesInput.value = playlist.notes || '';
+        }
+
         dom.songsContainer.innerHTML = '';
         var songs = [];
         try {

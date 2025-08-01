@@ -67,6 +67,7 @@
             brideZaffa: dom.brideZaffaInput.value,
             groomZaffa: dom.groomZaffaInput.value,
             songs: songs,
+            notes: dom.notesInput.value.trim(),
             username: currentUser,
             password: currentUserPassword
         };

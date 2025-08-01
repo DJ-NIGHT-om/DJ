@@ -40,6 +40,7 @@
             dom.phoneNumberInput = document.getElementById('phoneNumber');
             dom.brideZaffaInput = document.getElementById('brideZaffa');
             dom.groomZaffaInput = document.getElementById('groomZaffa');
+            dom.notesInput = document.getElementById('notes');
         }
         return dom;
     }

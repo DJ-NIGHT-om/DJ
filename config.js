@@ -1,7 +1,7 @@
 // --- تعليمات هامة جدا ---
 // 1. اذهب إلى https://sheets.new لإنشاء جدول بيانات جوجل جديد.
 // 2. في الصف الأول، قم بإنشاء العناوين التالية بالترتيب الدقيق:
-//    id, date, location, phoneNumber, brideZaffa, groomZaffa, songs, username, password
+//    id, date, location, phoneNumber, brideZaffa, groomZaffa, songs, notes, username, password
 // 3. اذهب إلى "الإضافات" (Extensions) -> "برمجة تطبيقات" (Apps Script).
 // 4. احذف أي كود موجود والصق الكود الموجود في الأسفل (من قسم GOOGLE_APPS_SCRIPT_CODE).
 // 5. انقر على "نشر" (Deploy) -> "نشر جديد" (New deployment).
@@ -144,6 +144,7 @@ function doPost(e) {
             brideZaffa: data.brideZaffa,
             groomZaffa: data.groomZaffa,
             songs: JSON.stringify(data.songs || []),
+            notes: data.notes || '',
             username: data.username || '',
             password: data.password || ''
         };
