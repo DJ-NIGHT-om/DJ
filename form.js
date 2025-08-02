@@ -4,17 +4,21 @@
 
     /**
      * Updates the day name display when date changes
-     * @param {Date | null} dateObject - The selected date object, or null if cleared.
+     * @param {HTMLInputElement} dateInput - The date input element
+     * @param {HTMLElement} dayNameDisplay - The element to display the day name
      */
-    function updateDayNameDisplay(dateObject) {
-        var dom = window.getDOMElements();
-        if (!dom || !dom.dayNameDisplay) return;
-
-        if (dateObject && !isNaN(dateObject.getTime())) {
-            var dayName = window.getArabicDayName(dateObject);
-            dom.dayNameDisplay.textContent = dayName;
+    function updateDayNameDisplay(dateInput, dayNameDisplay) {
+        if (!dateInput || !dayNameDisplay) return;
+        if (dateInput.value) {
+            var selectedDate = new Date(dateInput.value);
+            if (!isNaN(selectedDate.getTime())) {
+                var dayName = window.getArabicDayName(selectedDate);
+                dayNameDisplay.textContent = dayName;
+            } else {
+                dayNameDisplay.textContent = '';
+            }
         } else {
-            dom.dayNameDisplay.textContent = '';
+            dayNameDisplay.textContent = '';
         }
     }
 
@@ -37,8 +41,7 @@
             dom.eventLocationInput,
             dom.phoneNumberInput,
             dom.brideZaffaInput,
-            dom.groomZaffaInput,
-            dom.notesInput
+            dom.groomZaffaInput
         ];
 
         inputsToToggle.forEach(input => {
@@ -204,18 +207,14 @@
         dom.playlistForm.reset();
         dom.songsContainer.innerHTML = '';
         dom.playlistIdInput.value = '';
-        if (dom.notesInput) dom.notesInput.value = '';
+        dom.notesInput.value = '';
         dom.formTitle.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة قائمة جديدة';
         dom.saveBtn.textContent = 'حفظ البيانات';
-        
-        // Clear Flatpickr instance and dependent UI
-        if (dom.eventDateInput && dom.eventDateInput._flatpickr) {
-            dom.eventDateInput._flatpickr.clear();
-        }
-        updateDayNameDisplay(null);
+        dom.dayNameDisplay.textContent = '';
         updateDateAvailabilityMessage(null);
-        
         addSongField(dom.songsContainer, false);
+        
+        updateDayNameDisplay(dom.eventDateInput, dom.dayNameDisplay);
         
         showForm(false);
     }
@@ -236,25 +235,20 @@
 
         var eventDate = new Date(playlist.date);
         if (!isNaN(eventDate.getTime())) {
-            if (dom.eventDateInput && dom.eventDateInput._flatpickr) {
-                // Use Flatpickr's API to set the date
-                dom.eventDateInput._flatpickr.setDate(eventDate, true); // true to trigger onChange
-            }
+            eventDate.setMinutes(eventDate.getMinutes() - eventDate.getTimezoneOffset());
+            dom.eventDateInput.value = eventDate.toISOString().split('T')[0];
+            updateDayNameDisplay(dom.eventDateInput, dom.dayNameDisplay);
         } else {
-            if (dom.eventDateInput && dom.eventDateInput._flatpickr) {
-                dom.eventDateInput._flatpickr.clear();
-            }
+            dom.eventDateInput.value = '';
+            dom.dayNameDisplay.textContent = '';
         }
 
         dom.eventLocationInput.value = playlist.location;
         dom.phoneNumberInput.value = playlist.phoneNumber;
         dom.brideZaffaInput.value = playlist.brideZaffa;
         dom.groomZaffaInput.value = playlist.groomZaffa;
+        dom.notesInput.value = playlist.notes || '';
         
-        if (dom.notesInput) {
-            dom.notesInput.value = playlist.notes || '';
-        }
-
         dom.songsContainer.innerHTML = '';
         var songs = [];
         try {

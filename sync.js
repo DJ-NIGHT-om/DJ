@@ -2,6 +2,8 @@
 (function() {
     'use strict';
     
+    /* @tweakable The delay in milliseconds between each background data sync. (e.g., 3000 = 3 seconds) */
+    const syncFrequency = 3000;
     var syncInterval;
     var allPlaylists = [];
     var allSheetData = []; // To store all data from the sheet for date checking
@@ -102,6 +104,9 @@
                     return new Date(a.date) - new Date(b.date);
                 });
                 
+                // Cache the latest active playlists for faster initial load
+                localStorage.setItem('cachedPlaylists_' + currentUser, JSON.stringify(allPlaylists));
+                
                 // Only update UI if we're on the main page
                 if (window.location.pathname.indexOf('index.html') !== -1 || window.location.pathname === '/') {
                     var dom = window.getDOMElements();
@@ -130,6 +135,10 @@
             .catch(function(error) {
                 console.error('Error syncing data:', error);
                 // Don't show error to user for background sync
+            })
+            .finally(function() {
+                // Ensure loading indicator is hidden after sync
+                window.showLoading(false);
             });
     }
 
@@ -145,8 +154,8 @@
         // Initial sync
         syncDataFromSheet();
         
-        // Sync every 3 seconds for better responsiveness
-        syncInterval = setInterval(syncDataFromSheet, 3000);
+        // Sync every N seconds for better responsiveness
+        syncInterval = setInterval(syncDataFromSheet, syncFrequency);
     }
 
     /**
@@ -165,71 +174,28 @@
      */
     function initializePage() {
         var currentUser = localStorage.getItem('currentUser');
-        if (!currentUser) return Promise.resolve();
+        if (!currentUser) return;
 
-        window.showLoading(true);
-        return window.fetchPlaylistsFromSheet()
-            .then(function(data) {
-                allSheetData = data; // Store all fetched data
-
-                // Filter data for current user only
-                var userPlaylists = data.filter(function(playlist) {
-                    return playlist.username === currentUser;
-                });
-
-                var today = new Date();
-                today.setHours(0, 0, 0, 0); // Set to start of today for comparison
-
-                var currentPlaylists = [];
-                var playlistsToArchive = [];
-                var localArchive = JSON.parse(localStorage.getItem('archivedPlaylists')) || [];
-                var localArchiveIds = {};
-                
-                for (var i = 0; i < localArchive.length; i++) {
-                    localArchiveIds[localArchive[i].id.toString()] = true;
-                }
-
-                for (var i = 0; i < userPlaylists.length; i++) {
-                    var playlist = userPlaylists[i];
-                    
-                    // Skip credential-only entries (entries without actual playlist data)
-                    if (!playlist.date || playlist.date.trim() === '') {
-                        continue;
-                    }
-                    
-                    var eventDate = new Date(playlist.date);
-                    eventDate.setHours(0, 0, 0, 0); // Set to start of event date for comparison
-
-                    if (!isNaN(eventDate.getTime()) && eventDate < today) {
-                        // Date is in the past - should be archived
-                        if (!localArchiveIds[playlist.id.toString()]) {
-                            playlistsToArchive.push(playlist);
-                        }
-                    } else {
-                        // Date is today or in the future - should be on main page
-                        currentPlaylists.push(playlist);
-                    }
-                }
-                
-                allPlaylists = currentPlaylists.sort(function(a, b) {
-                    return new Date(a.date) - new Date(b.date);
-                });
+        // 1. Load from local cache and display immediately for a fast UI response
+        try {
+            var cachedPlaylists = JSON.parse(localStorage.getItem('cachedPlaylists_' + currentUser)) || [];
+            if (cachedPlaylists.length > 0) {
+                allPlaylists = cachedPlaylists;
                 var dom = window.getDOMElements();
                 window.renderPlaylists(dom.playlistSection, allPlaylists);
-                // Dispatch a custom event to notify other modules that data has been initialized
                 window.dispatchEvent(new CustomEvent('datasync'));
-
-                if (playlistsToArchive.length > 0) {
-                    return window.archivePlaylists(playlistsToArchive);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error initializing page:', error);
-                window.showAlert('حدث خطأ أثناء جلب البيانات. تأكد من صحة الرابط والأذونات، وأن الصف الأول في جوجل شيت يحتوي على العناوين الصحيحة.');
-            })
-            .finally(function() {
-                window.showLoading(false);
-            });
+            } else {
+                // Only show loading indicator if there's no cached data to display
+                window.showLoading(true);
+            }
+        } catch (e) {
+            console.error("Error loading cached playlists:", e);
+            window.showLoading(true); // Show loading if cache fails
+        }
+        
+        // 2. Start the sync process to fetch fresh data from the sheet in the background.
+        // The sync function will handle rendering and hiding the loading indicator.
+        syncDataFromSheet();
     }
 
     /**

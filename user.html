@@ -71,6 +71,13 @@
         <p>هنا يتم تخزين جميع الحفلات التي انتهى تاريخها.</p>
     </footer>
 
+    <script>
+        /* @tweakable Setting to true will disable the right-click context menu. */
+        const preventContextMenu = true;
+        if (preventContextMenu) {
+            document.addEventListener('contextmenu', e => e.preventDefault());
+        }
+    </script>
     <script src="config.js" defer></script>
     <script src="modal.js" defer></script>
     <script src="api.js" defer></script>

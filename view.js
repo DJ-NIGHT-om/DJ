@@ -28,18 +28,16 @@
         
         var dayName = !isNaN(eventDate.getTime()) ? window.getArabicDayName(eventDate) : '';
 
-        var notesHtml = '';
-        if (playlist.notes) {
-            notesHtml = '<div class="playlist-notes">' +
-                '<h4><i class="fas fa-sticky-note icon"></i> ملاحظات:</h4>' +
-                '<p>' + playlist.notes.replace(/\n/g, '<br>') + '</p>' +
-            '</div>';
-        }
-
         var actionsHtml = isArchived ?
             '<button class="action-btn delete-btn single-delete-btn"><i class="fas fa-trash-alt"></i> حذف من الأرشيف</button>' :
             '<button class="action-btn edit-btn"><i class="fas fa-edit"></i> تعديل</button>' +
             '<button class="action-btn delete-btn"><i class="fas fa-trash-alt"></i> حذف</button>';
+
+        /* @tweakable Placeholder text for notes when empty */
+        const emptyNotesText = "لا توجد ملاحظات.";
+        var notesHtml = playlist.notes ?
+            '<p>' + playlist.notes + '</p>' :
+            '<p><em>' + emptyNotesText + '</em></p>';
 
         var card = document.createElement('div');
         card.className = 'playlist-card card';
@@ -59,7 +57,10 @@
                 '<h4><i class="fas fa-music icon"></i>' + (isArchived ? 'قائمة الأغاني:' : 'الأغاني المطلوبة :') + '</h4>' +
                 songsHtml +
             '</div>' +
-            notesHtml +
+            '<div class="playlist-notes">' +
+                '<h4><i class="fas fa-sticky-note icon"></i> ملاحظات:</h4>' +
+                notesHtml +
+            '</div>' +
             '<div class="playlist-actions">' + actionsHtml + '</div>';
         
         return card;

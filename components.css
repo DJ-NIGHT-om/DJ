@@ -12,11 +12,7 @@
     transform: translateY(-5px);
     box-shadow: 0 8px 25px var(--shadow-color);
 }
-.icon {
-  background-color: white;        /* خلفية بيضاء */
-  padding: 5px;                   /* مسافة حول الأيقونة */
- 
-}
+
 .form-container {
     max-width: var(--form-max-width, 500px);
     margin: 0 auto;
@@ -105,12 +101,6 @@ input:focus, textarea:focus {
   
 }
 
-/* Style for readonly inputs to indicate they are not for typing */
-input[readonly] {
-    background-color: #f8f9fa;
-    cursor: pointer;
-}
-
 .form-buttons {
     display: flex;
     gap: 0.8rem;
@@ -185,7 +175,6 @@ input[readonly] {
 #playlist-section {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    /* @tweakable The spacing between playlist cards */
     gap: 1.5rem;
     align-items: start;
   
@@ -260,7 +249,6 @@ input[readonly] {
     padding-bottom: 1rem;
     flex-wrap: wrap;
     gap: var(--card-header-gap, 1.5rem);
-  
 }
 
 .playlist-card-header h3 {
@@ -269,7 +257,6 @@ input[readonly] {
     margin-bottom: 0;
     font-weight: bold;
    color: #0092cb;
-  
 }
 
 .playlist-card-header span {
@@ -282,7 +269,6 @@ input[readonly] {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-  
 }
 
 .playlist-card-info p {
@@ -297,7 +283,27 @@ input[readonly] {
 
 .playlist-card-info p strong {
     color: var(--primary-color);
-  background-color: transparent;
+  
+}
+
+.playlist-notes {
+    margin-top: 1rem;
+}
+
+.playlist-notes h4 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.playlist-notes p {
+    background-color: #FCF4E4;
+    padding: 0.5rem;
+    border-radius: 4px;
+    border-right: 3px solid var(--secondary-color);
+    white-space: pre-wrap; /* Preserve whitespace and newlines */
+    color: #DB8100;
+   font-weight: bold;
 }
 
 .playlist-card .icon {
@@ -317,40 +323,12 @@ input[readonly] {
     color: var(--text-color);
     margin-bottom: 0.5rem;
     font-weight: bold;
-  
 }
 
 .playlist-songs ol {
     padding-right: 20px;
     color: #8e44ad;
   
-}
-
-.playlist-notes {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px dashed var(--border-color);
-   font-weight: bold;
-  
-}
-
-.playlist-notes h4 {
-    color: var(--text-color);
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-  
-}
-
-.playlist-notes p {
-    background-color: #fffbe6;
-    border-left: 3px solid #f5a623;
-    padding: 0.75rem;
-    border-radius: 4px;
-    white-space: pre-wrap; /* To preserve line breaks */
-    word-wrap: break-word;
-    color: #DB8100;
 }
 
 .playlist-songs li {
@@ -362,7 +340,7 @@ input[readonly] {
 .playlist-actions {
     display: flex;
     gap: 10px;
-    margin-top: 1.5rem;
+    margin-top: var(--playlist-actions-margin-top);
     justify-content: flex-start;
   
 }

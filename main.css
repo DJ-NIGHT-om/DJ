@@ -24,6 +24,8 @@
     --modal-button-font-size: 0.9rem;
     /* @tweakable The minimum width for modal buttons */
     --modal-button-min-width: 100px;
+    /* @tweakable The space above the action buttons in a playlist card */
+    --playlist-actions-margin-top: 1.5rem;
 }
 
 * {

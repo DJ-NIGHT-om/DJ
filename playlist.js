@@ -14,22 +14,11 @@
 
         var dom = window.getDOMElements();
         
-        // Validate date is selected
-        if (!dom.eventDateInput.value) {
-            window.showAlert('يرجى اختيار تاريخ المناسبة.');
-            return;
-        }
-
         // Validate date - must be today or future
-        var selectedDates = dom.eventDateInput._flatpickr.selectedDates;
-        if (selectedDates.length === 0) {
-             window.showAlert('يرجى اختيار تاريخ صالح.');
-             return;
-        }
-        var selectedDate = selectedDates[0];
-        
+        var selectedDate = new Date(dom.eventDateInput.value);
         var today = new Date();
         today.setHours(0, 0, 0, 0); // Set to start of day for comparison
+        selectedDate.setHours(0, 0, 0, 0);
         
         if (selectedDate < today) {
             window.showAlert('لا يمكن اختيار تاريخ في الماضي. يرجى اختيار تاريخ اليوم أو تاريخ مستقبلي.');
@@ -53,21 +42,15 @@
         // Check if this is the first playlist being added by this user
         const isFirstPlaylist = !isEdit && window.getAllPlaylists().length === 0;
 
-        // Get the date from Flatpickr, convert it to YYYY-MM-DD for storage
-        var dateToStore = new Date(selectedDates[0]);
-        // Adjust for timezone offset to store the selected calendar day correctly
-        dateToStore.setMinutes(dateToStore.getMinutes() - dateToStore.getTimezoneOffset());
-        var dateStringForSheet = dateToStore.toISOString().split('T')[0];
-
         var playlistData = {
             action: isEdit ? 'edit' : 'add',
-            date: dateStringForSheet,
+            date: dom.eventDateInput.value,
             location: dom.eventLocationInput.value,
             phoneNumber: dom.phoneNumberInput.value,
             brideZaffa: dom.brideZaffaInput.value,
             groomZaffa: dom.groomZaffaInput.value,
             songs: songs,
-            notes: dom.notesInput.value.trim(),
+            notes: dom.notesInput.value,
             username: currentUser,
             password: currentUserPassword
         };
