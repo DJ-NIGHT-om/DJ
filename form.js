@@ -3,6 +3,31 @@
     'use strict';
 
     /**
+     * Attaches an auto-resize listener to a textarea element.
+     * The textarea will expand vertically to fit its content.
+     * @param {HTMLTextAreaElement} textarea - The textarea element.
+     */
+    function enableAutoresize(textarea) {
+        if (!textarea) return;
+        
+        const autoresizeHandler = () => {
+            // Only resize if the new content height is greater than the current element height
+            if (textarea.scrollHeight > textarea.clientHeight) {
+                textarea.style.height = 'auto';
+                // A small buffer helps prevent scrollbars on single-line textareas
+                const buffer = 2; 
+                textarea.style.height = (textarea.scrollHeight + buffer) + 'px';
+            }
+        };
+
+        textarea.addEventListener('input', autoresizeHandler);
+        textarea.addEventListener('change', autoresizeHandler); // For initial population
+        
+        // Trigger it once initially in case there's pre-filled content
+        setTimeout(autoresizeHandler, 10); // A slightly longer delay to ensure styles are applied
+    }
+    
+    /**
      * Updates the day name display when date changes
      * @param {HTMLInputElement} dateInput - The date input element
      * @param {HTMLElement} dayNameDisplay - The element to display the day name
@@ -130,11 +155,19 @@
         var group = document.createElement('div');
         group.className = 'song-input-group';
 
+        var inputContainer = document.createElement('div');
+        inputContainer.className = 'auto-expand-input-container song-input-container';
+        inputContainer.dataset.value = value;
+
         var input = document.createElement('input');
         input.type = 'text';
-        input.className = 'song-input';
+        input.className = 'song-input auto-expand-input';
         input.placeholder = 'أدخل اسم الأغنية';
         input.value = value;
+        
+        input.addEventListener('input', () => {
+            inputContainer.dataset.value = input.value;
+        });
 
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
@@ -161,7 +194,8 @@
                 });
         };
 
-        group.appendChild(input);
+        inputContainer.appendChild(input);
+        group.appendChild(inputContainer);
         group.appendChild(removeBtn);
         container.appendChild(group);
 
@@ -212,6 +246,13 @@
         dom.saveBtn.textContent = 'حفظ البيانات';
         dom.dayNameDisplay.textContent = '';
         updateDateAvailabilityMessage(null);
+        
+        // Setup autoresize for static textareas
+        [dom.notesInput].forEach(enableAutoresize);
+        
+        // Setup auto-expand for static inputs
+        [dom.eventLocationInput, dom.brideZaffaInput, dom.groomZaffaInput].forEach(setupAutoExpand);
+
         addSongField(dom.songsContainer, false);
         
         updateDayNameDisplay(dom.eventDateInput, dom.dayNameDisplay);
@@ -249,6 +290,18 @@
         dom.groomZaffaInput.value = playlist.groomZaffa;
         dom.notesInput.value = playlist.notes || '';
         
+        // Trigger autoresize for notes field
+        if (dom.notesInput) {
+            setTimeout(() => dom.notesInput.dispatchEvent(new Event('change')), 10);
+        }
+        
+        // Trigger auto-expand for text inputs
+        [dom.eventLocationInput, dom.brideZaffaInput, dom.groomZaffaInput].forEach(input => {
+            if (input) {
+                setTimeout(() => input.dispatchEvent(new Event('input')), 10);
+            }
+        });
+
         dom.songsContainer.innerHTML = '';
         var songs = [];
         try {
@@ -268,6 +321,27 @@
         if (songs.length < maxSongs) {
             addSongField(dom.songsContainer, true);
         }
+    }
+
+    /**
+     * Wraps an auto-expanding input in its necessary container.
+     * @param {HTMLInputElement} inputEl - The input element to wrap.
+     */
+    function setupAutoExpand(inputEl) {
+        if (!inputEl || inputEl.parentNode.classList.contains('auto-expand-input-container')) {
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'auto-expand-input-container';
+
+        inputEl.parentNode.insertBefore(container, inputEl);
+        container.appendChild(inputEl);
+        
+        container.dataset.value = inputEl.value;
+        inputEl.addEventListener('input', () => {
+            container.dataset.value = inputEl.value;
+        });
     }
 
     // Make functions globally accessible
