@@ -11,20 +11,17 @@
         if (!textarea) return;
         
         const autoresizeHandler = () => {
-            // Only resize if the new content height is greater than the current element height
-            if (textarea.scrollHeight > textarea.clientHeight) {
-                textarea.style.height = 'auto';
-                // A small buffer helps prevent scrollbars on single-line textareas
-                const buffer = 2; 
-                textarea.style.height = (textarea.scrollHeight + buffer) + 'px';
-            }
+            textarea.style.height = 'auto';
+            // A small buffer helps prevent scrollbars on single-line textareas
+            const buffer = 2; 
+            textarea.style.height = (textarea.scrollHeight + buffer) + 'px';
         };
 
         textarea.addEventListener('input', autoresizeHandler);
         textarea.addEventListener('change', autoresizeHandler); // For initial population
         
         // Trigger it once initially in case there's pre-filled content
-        setTimeout(autoresizeHandler, 10); // A slightly longer delay to ensure styles are applied
+        setTimeout(autoresizeHandler, 10); 
     }
     
     /**

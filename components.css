@@ -137,10 +137,10 @@ textarea {
 
 textarea.autoresize {
     /* @tweakable 'vertical' allows manual vertical resize, 'none' disables it */
-    resize: vertical;
+    resize: none;
     overflow-y: hidden;
     line-height: 1.6;
-    /* @tweakable The initial minimum height of the notes textarea. */
+    /* @tweakable The initial minimum height for the notes textarea. */
     min-height: 120px;
 }
 
