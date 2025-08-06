@@ -5,7 +5,7 @@
     /* @tweakable The username for the application administrator. */
     const ADMIN_USERNAME = 'DJNIGHT';
     /* @tweakable The password for the application administrator. */
-    const ADMIN_PASSWORD = 'DJNIGHT3311';
+    const ADMIN_PASSWORD = 'DJNIGHT2011';
     
     // Register service worker for offline functionality
     if ('serviceWorker' in navigator) {
