@@ -4,6 +4,9 @@
     
     /* @tweakable The delay in milliseconds between each background data sync. (e.g., 3000 = 3 seconds) */
     const syncFrequency = 3000;
+    /* @tweakable The delay in milliseconds before retrying a failed background sync operation. */
+    const backgroundSyncRetryDelay = 5000;
+
     var syncInterval;
     var allPlaylists = [];
     var allSheetData = []; // To store all data from the sheet for date checking
@@ -144,6 +147,11 @@
             .catch(function(error) {
                 console.error('Error syncing data:', error);
                 // Don't show error to user for background sync
+                 /* @tweakable If true, the app will retry syncing after a failure, using the backgroundSyncRetryDelay. */
+                const retrySyncOnFailure = true;
+                if(retrySyncOnFailure){
+                    setTimeout(syncDataFromSheet, backgroundSyncRetryDelay);
+                }
             })
             .finally(function() {
                 // Ensure loading indicator is hidden after sync
@@ -243,6 +251,45 @@
         }
     }
 
+    /**
+     * Removes a playlist from the local `allPlaylists` array without needing a full sync.
+     * @param {string} id - The ID of the playlist to remove.
+     */
+    function removeLocalPlaylist(id) {
+        allPlaylists = allPlaylists.filter(p => p.id.toString() !== id.toString());
+        // Also update cache
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            localStorage.setItem('cachedPlaylists_' + currentUser, JSON.stringify(allPlaylists));
+        }
+    }
+
+    /**
+     * Updates a playlist in the local `allPlaylists` array without needing a full sync.
+     * @param {object} updatedPlaylist - The playlist object with the new data.
+     */
+    function updateLocalPlaylist(updatedPlaylist) {
+        let found = false;
+        allPlaylists = allPlaylists.map(p => {
+            if (p.id.toString() === updatedPlaylist.id.toString()) {
+                found = true;
+                // Merge new data into the existing object to preserve any other properties
+                return { ...p, ...updatedPlaylist };
+            }
+            return p;
+        });
+        if (!found) {
+             // This case shouldn't happen in normal flow but is a good safeguard.
+            allPlaylists.push(updatedPlaylist);
+        }
+        
+         // Also update cache
+        const currentUser = localStorage.getItem('currentUser');
+        if (currentUser) {
+            localStorage.setItem('cachedPlaylists_' + currentUser, JSON.stringify(allPlaylists));
+        }
+    }
+
     function getAllPlaylists() {
         return allPlaylists;
     }
@@ -259,4 +306,6 @@
     window.archivePlaylists = archivePlaylists;
     window.getAllPlaylists = getAllPlaylists;
     window.getAllSheetData = getAllSheetData;
+    window.removeLocalPlaylist = removeLocalPlaylist;
+    window.updateLocalPlaylist = updateLocalPlaylist;
 })();

@@ -21,15 +21,15 @@ var GAS_URL_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzudjhmypRnjrsqA
 window.GAS_URL_ENDPOINT = GAS_URL_ENDPOINT;
 
 /* --- GOOGLE_APPS_SCRIPT_CODE --- (الصق هذا في محرر Apps Script)
-const SHEET_NAME = 'Sheet1'; // Or your sheet's name
-const SCRIPT_PROP = PropertiesService.getScriptProperties();
-
-function setup() {
-  const activeSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-  SCRIPT_PROP.setProperty('key', activeSheet.getParent().getId());
-}
-
 function doGet(e) {
+  const SHEET_NAME = 'Sheet1'; // Or your sheet's name
+  const SCRIPT_PROP = PropertiesService.getScriptProperties();
+
+  // Call setup if key is not present, for first-time run
+  if (!SCRIPT_PROP.getProperty('key')) {
+    setup();
+  }
+
   const sheet = SpreadsheetApp.openById(SCRIPT_PROP.getProperty('key')).getSheetByName(SHEET_NAME);
   const data = sheet.getDataRange().getValues();
   const headers = data.shift(); // remove header row
@@ -44,6 +44,9 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  const SHEET_NAME = 'Sheet1'; // Or your sheet's name
+  const SCRIPT_PROP = PropertiesService.getScriptProperties();
+
   try {
     const sheet = SpreadsheetApp.openById(SCRIPT_PROP.getProperty('key')).getSheetByName(SHEET_NAME);
     const data = JSON.parse(e.postData.contents);
@@ -135,7 +138,30 @@ function doPost(e) {
         }
         return ContentService.createTextOutput(JSON.stringify({status: 'success', message: `${deletedCount} rows archived.`})).setMimeType(ContentService.MimeType.JSON);
         
+    } else if (data.action === 'updateSongStatus') {
+        const idToUpdate = data.id;
+        const songStatuses = data.songStatuses;
+        const idColumn = sheet.getRange("A:A").getValues();
+        const statusColumnIndex = headers.indexOf('songStatuses') + 1;
+
+        if (statusColumnIndex === 0) {
+             return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'songStatuses column not found'})).setMimeType(ContentService.MimeType.JSON);
+        }
+
+        for (let i = 1; i < idColumn.length; i++) {
+           if (idColumn[i][0] == idToUpdate) {
+              sheet.getRange(i + 1, statusColumnIndex).setValue(JSON.stringify(songStatuses));
+              return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Song statuses updated'})).setMimeType(ContentService.MimeType.JSON);
+           }
+        }
+        return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'ID not found for status update'})).setMimeType(ContentService.MimeType.JSON);
+        
     } else if (data.action === 'add' || data.action === 'edit') {
+        /* @tweakable The timezone for the submission /*timestamp (e.g., 'GMT+4'). 
+        const timezone = 'GMT+4';
+        const now = new Date();
+        const submissionDateTime = Utilities.formatDate(now, timezone, 'yyyy-MM-dd dddd HH:mm:ss');
+        
         const rowData = {
             id: data.id || new Date().getTime().toString(),
             date: data.date,
@@ -146,10 +172,12 @@ function doPost(e) {
             songs: JSON.stringify(data.songs || []),
             notes: data.notes || '',
             username: data.username || '',
-            password: data.password || ''
+            password: data.password || '',
+            submissionDateTime: submissionDateTime,
+            songStatuses: data.songStatuses || '{}' // Initialize or preserve song statuses
         };
 
-        const rowAsArray = headers.map(header => rowData[header]);
+        const rowAsArray = headers.map(header => rowData[header] !== undefined ? rowData[header] : '');
 
         if (data.action === 'edit') {
              const idColumn = sheet.getRange("A:A").getValues();
@@ -161,6 +189,11 @@ function doPost(e) {
                 }
              }
              if(rowToUpdate !== -1) {
+                // When editing, fetch existing statuses unless new ones are provided
+                if (!data.songStatuses) {
+                    const existingStatuses = sheet.getRange(rowToUpdate, headers.indexOf('songStatuses') + 1).getValue();
+                    rowAsArray[headers.indexOf('songStatuses')] = existingStatuses || '{}';
+                }
                 sheet.getRange(rowToUpdate, 1, 1, rowAsArray.length).setValues([rowAsArray]);
                 return ContentService.createTextOutput(JSON.stringify({status: 'success', data: rowData})).setMimeType(ContentService.MimeType.JSON);
              } else {
@@ -176,4 +209,20 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({status: 'error', message: error.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+function setup() {
+  const SHEET_NAME = 'Sheet1'; // Or your sheet's name
+  const SCRIPT_PROP = PropertiesService.getScriptProperties();
+  const activeSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  SCRIPT_PROP.setProperty('key', activeSheet.getParent().getId());
+}
 */
+
+/* @tweakable Set to true to enable more detailed console logging for debugging. */
+const enableDebugLogging = false;
+
+if (!enableDebugLogging) {
+    console.log = function() {};
+    console.warn = function() {};
+    console.error = function() {};
+}

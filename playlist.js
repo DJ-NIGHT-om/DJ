@@ -46,7 +46,7 @@
         const isFirstPlaylist = !isEdit && window.getAllPlaylists().length === 0;
 
         var playlistData = {
-            action: isEdit ? 'edit' : 'add',
+            // Note: 'id' is added later for edit operations
             date: dom.eventDateInput.value,
             location: dom.eventLocationInput.value,
             phoneNumber: dom.phoneNumberInput.value,
@@ -59,36 +59,58 @@
             password: currentUserPassword
         };
 
-        // Only include id for edit operations
         if (isEdit) {
             playlistData.id = playlistId;
-        }
 
-        window.postDataToSheet(playlistData)
-            .then(function(result) {
-                if (result.status === 'success') {
-                    window.resetForm();
-                    // Force immediate sync after save
-                    return window.syncDataFromSheet().then(function() {
-                        // After sync, check if it was the first playlist.
-                        if (isFirstPlaylist && window.getAllPlaylists().length > 0) {
-                           localStorage.setItem('firstPlaylistCreationTime', new Date().getTime());
-                           if (window.triggerWelcomeConfetti) {
-                              window.triggerWelcomeConfetti();
-                           }
-                        }
-                    });
-                } else {
-                    throw new Error(result.message || 'Failed to save data.');
-                }
-            })
-            .catch(function(error) {
-                console.error('Error saving playlist:', error);
-                window.showAlert('حدث خطأ أثناء حفظ القائمة.');
-            })
-            .finally(function() {
-                window.showLoading(false);
-            });
+            // --- Optimistic UI Update for Edit ---
+            // 1. Immediately update the local data
+            window.updateLocalPlaylist(playlistData);
+            
+            // 2. Immediately re-render the UI with the new data
+            var dom = window.getDOMElements();
+            if (dom.playlistSection) {
+                window.renderPlaylists(dom.playlistSection, window.getAllPlaylists());
+            }
+            window.resetForm();
+            window.showLoading(false); // Hide loading indicator immediately
+            
+            // 3. Send the update to the server in the background
+            window.postDataToSheet({ ...playlistData, action: 'edit' })
+                .catch(function(error) {
+                    console.error('Background edit failed:', error);
+                    window.showAlert('فشل تحديث البيانات في الخلفية. سيتم تصحيح البيانات عند التحديث التالي.');
+                    // The periodic sync will eventually correct any discrepancies.
+                });
+
+        } else { // This is for 'add' action
+            playlistData.id = new Date().getTime().toString();
+            // --- Send 'add' request to the server ---
+             window.postDataToSheet({ ...playlistData, action: 'add' })
+                .then(function(result) {
+                    if (result.status === 'success') {
+                        window.resetForm();
+                        // Force immediate sync after save
+                        return window.syncDataFromSheet().then(function() {
+                            // After sync, check if it was the first playlist.
+                            if (isFirstPlaylist && window.getAllPlaylists().length > 0) {
+                               localStorage.setItem('firstPlaylistCreationTime', new Date().getTime());
+                               if (window.triggerWelcomeConfetti) {
+                                  window.triggerWelcomeConfetti();
+                               }
+                            }
+                        });
+                    } else {
+                        throw new Error(result.message || 'Failed to save data.');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error saving playlist:', error);
+                    window.showAlert('حدث خطأ أثناء حفظ القائمة.');
+                })
+                .finally(function() {
+                    window.showLoading(false);
+                });
+        }
     }
     
     /**
@@ -107,22 +129,25 @@
             window.showConfirm('هل أنت متأكد من حذف هذه القائمة؟')
                 .then(function(confirmed) {
                     if (confirmed) {
-                        window.showLoading(true);
-                        return window.postDataToSheet({ action: 'delete', id: playlistId });
+                        // --- Optimistic UI Update for Delete ---
+                        // 1. Immediately remove from local data
+                        window.removeLocalPlaylist(playlistId);
+                        
+                        // 2. Animate and remove the card from the UI
+                        var cardToRemove = e.target.closest('.playlist-card');
+                        if (cardToRemove) {
+                            cardToRemove.classList.add('card-deleting');
+                            setTimeout(() => cardToRemove.remove(), window.cardDeleteAnimationDuration || 300);
+                        }
+
+                        // 3. Send the delete request to the server in the background
+                        window.postDataToSheet({ action: 'delete', id: playlistId })
+                            .catch(function(error) {
+                                console.error('Background delete failed:', error);
+                                window.showAlert('فشل الحذف في الخلفية. سيتم تحديث القائمة لاحقاً.');
+                                // The periodic sync will handle any inconsistencies.
+                            });
                     }
-                })
-                .then(function(result) {
-                    if (result) {
-                        // Force immediate sync after delete
-                        return window.syncDataFromSheet();
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error deleting playlist:', error);
-                    window.showAlert('حدث خطأ أثناء حذف القائمة.');
-                })
-                .finally(function() {
-                    window.showLoading(false);
                 });
         } else if (isEditButton) {
             var allPlaylists = window.getAllPlaylists();
