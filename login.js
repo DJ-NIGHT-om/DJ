@@ -2,6 +2,11 @@
 (function() {
     'use strict';
     
+    /* @tweakable The username for the application administrator. */
+    const ADMIN_USERNAME = 'DJNIGHT';
+    /* @tweakable The password for the application administrator. */
+    const ADMIN_PASSWORD = 'DJNIGHT2011';
+    
     // Register service worker for offline functionality
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -103,6 +108,16 @@
                     return;
                 }
 
+                // Admin login check
+                if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                    window.showLoading(true);
+                    localStorage.setItem('currentUser', username);
+                    localStorage.setItem('currentUserPassword', password);
+                    localStorage.setItem('isAdmin', 'true');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
                 window.showLoading(true);
                 
                 authenticateUser(username, password)
@@ -110,6 +125,7 @@
                         if (result.status === 'success') {
                             localStorage.setItem('currentUser', username);
                             localStorage.setItem('currentUserPassword', password);
+                            localStorage.removeItem('isAdmin'); // Ensure not set for regular users
                             window.location.href = 'index.html';
                         } else {
                             loginAttempts++;

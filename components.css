@@ -331,6 +331,19 @@ input:focus, textarea:focus {
    
 }
 
+/* Style for admin-only username display */
+.playlist-card-info .admin-info {
+    background-color: #fef2f2; /* Lighter red */
+    color: #991b1b; /* Darker red text */
+    padding: 0.5rem;
+    border-radius: 4px;
+    border-right: 3px solid #fca5a5; /* Red border */
+}
+
+.playlist-card-info .admin-info strong {
+    color: #991b1b;
+}
+
 .playlist-card-info p strong {
     color: var(--primary-color);
   

@@ -238,6 +238,7 @@
         dom.playlistForm.reset();
         dom.songsContainer.innerHTML = '';
         dom.playlistIdInput.value = '';
+        document.getElementById('originalUsername').value = '';
         dom.notesInput.value = '';
         dom.formTitle.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة قائمة جديدة';
         dom.saveBtn.textContent = 'حفظ البيانات';
@@ -270,6 +271,11 @@
         dom.formTitle.innerHTML = '<i class="fas fa-edit"></i> تعديل القائمة';
         dom.saveBtn.textContent = 'حفظ التعديلات';
         dom.playlistIdInput.value = playlist.id;
+
+        // For admin edits, store the original username to preserve it on save
+        if (localStorage.getItem('isAdmin') === 'true') {
+            document.getElementById('originalUsername').value = playlist.username || '';
+        }
 
         var eventDate = new Date(playlist.date);
         if (!isNaN(eventDate.getTime())) {

@@ -39,6 +39,9 @@
         var playlistId = dom.playlistIdInput.value;
         var isEdit = playlistId && playlistId.trim() !== '';
 
+        var isAdmin = localStorage.getItem('isAdmin') === 'true';
+        var originalUsername = document.getElementById('originalUsername').value;
+
         // Check if this is the first playlist being added by this user
         const isFirstPlaylist = !isEdit && window.getAllPlaylists().length === 0;
 
@@ -51,7 +54,8 @@
             groomZaffa: dom.groomZaffaInput.value,
             songs: songs,
             notes: dom.notesInput.value,
-            username: currentUser,
+            // If admin is editing, use original user's name. Otherwise use current user's name.
+            username: (isAdmin && isEdit && originalUsername) ? originalUsername : currentUser,
             password: currentUserPassword
         };
 

@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <link rel="icon" href="logo1.png" type="image/png">
     <link rel="icon" href="logo1.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -65,12 +67,12 @@
                 </button>
             </div>
             <div id="first-playlist-message" class="first-playlist-message hidden">
-                <p><strong>سيتم تلبية طلباتكم و التواصل معكم لتكملة باقي الإجراءات</strong></p>
+                <p><strong>سيتم قراءة قاعدة بياناتكم و تلبية طلباتكم و التواصل معكم لتكملة باقي الإجراءات</strong></p>
             </div>
         </header>
 
         <div class="actions-container">
-            <button id="show-form-btn" class="submit-btn green-btn"><i class="fas fa-plus-circle"></i> إنشاء قاعدة بيانات جديدة</button>
+            <button id="show-form-btn" class="submit-btn green-btn"><i class="fas fa-plus-circle"></i> إنشاء مناسبة  جديدة</button>
         </div>
 
         <main>
@@ -78,6 +80,7 @@
                 <h2 id="form-title"><i class="fas fa-plus-circle"></i> إضافة قائمة جديدة</h2>
                 <form id="playlist-form">
                     <input type="hidden" id="playlistId">
+                    <input type="hidden" id="originalUsername">
                     <div class="form-group">
                         <label for="eventDate"><i class="fas fa-calendar-alt icon"></i> تاريخ المناسبة</label>
                         <div class="date-input-container">
@@ -92,7 +95,7 @@
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber"><i class="fas fa-phone icon"></i> رقم الهاتف لمتابعة الطلب</label>
-                        <input type="tel" id="phoneNumber" required pattern="[0-9]{8}" maxlength="8" inputmode="tel" title="الرجاء إدخال 8 أرقام فقط">
+                        <input type="tel" id="phoneNumber" pattern="[0-9]{8}" maxlength="8" inputmode="tel" title="الرجاء إدخال 8 أرقام فقط">
                     </div>
                     <div class="form-group">
                         <label for="brideZaffa"><i class="fas fa-female icon"></i> اسم زفة العروس</label>

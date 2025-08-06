@@ -14,6 +14,7 @@
      */
     function syncDataFromSheet() {
         var currentUser = localStorage.getItem('currentUser');
+        var isAdmin = localStorage.getItem('isAdmin') === 'true';
         if (!currentUser) return Promise.resolve();
 
         // Prevent excessive sync calls
@@ -27,10 +28,18 @@
             .then(function(data) {
                 allSheetData = data; // Store all fetched data
 
-                // Filter data for current user only
-                var userPlaylists = data.filter(function(playlist) {
-                    return playlist.username === currentUser;
-                });
+                var userPlaylists;
+                if (isAdmin) {
+                    // Admin sees all playlists, but we should still filter out rows that are just user accounts
+                    userPlaylists = data.filter(function(playlist) {
+                        return playlist.date && playlist.date.trim() !== '';
+                    });
+                } else {
+                    // Filter data for current user only
+                    userPlaylists = data.filter(function(playlist) {
+                        return playlist.username === currentUser;
+                    });
+                }
 
                 var today = new Date();
                 today.setHours(0, 0, 0, 0); // Set to start of today for comparison

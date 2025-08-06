@@ -49,16 +49,36 @@
 
         // Check if user is logged in
         var currentUser = localStorage.getItem('currentUser');
+        var isAdmin = localStorage.getItem('isAdmin') === 'true';
         if (!currentUser) {
             window.location.href = 'login.html';
             return;
         }
 
-        // Display current user
-        var userDisplay = document.getElementById('current-user-display');
-        if (userDisplay) {
-            userDisplay.textContent = 'مرحباً، ' + currentUser;
+        /**
+         * Updates the user display message. This is called on initial load and after data sync.
+         */
+        function updateUserDisplay() {
+            var userDisplay = document.getElementById('current-user-display');
+            if (userDisplay) {
+                if (isAdmin) {
+                    const activePlaylists = window.getAllPlaylists() || [];
+                    const activeCount = activePlaylists.length;
+                    /* @tweakable The welcome message for the administrator. */
+                    const adminWelcomeMessage = 'أهلاً بالمدير';
+                    /* @tweakable The template for displaying the active playlist count for the admin. Use {count} as a placeholder. */
+                    const activeCountTemplate = '- عدد قواعد البيانات النشطة: {count}';
+                    userDisplay.textContent = `${adminWelcomeMessage} ${activeCountTemplate.replace('{count}', activeCount)}`;
+                } else {
+                     /* @tweakable The welcome message for a regular user. Use {user} as a placeholder. */
+                    const userWelcomeTemplate = 'مرحباً، {user}';
+                    userDisplay.textContent = userWelcomeTemplate.replace('{user}', currentUser);
+                }
+            }
         }
+        
+        // Display current user initially
+        updateUserDisplay();
 
         // Logout functionality
         var logoutBtn = document.getElementById('logout-btn');
@@ -78,6 +98,7 @@
                             localStorage.removeItem('currentUser');
                             localStorage.removeItem('currentUserPassword');
                             localStorage.removeItem('archivedPlaylists');
+                            localStorage.removeItem('isAdmin');
                             window.location.href = 'login.html';
                         }
                     });
@@ -167,6 +188,14 @@
         }
 
         if (dom.phoneNumberInput) {
+            /* @tweakable The placeholder text for the optional phone number field. */
+            const phoneNumberPlaceholder = "إختياري";
+            dom.phoneNumberInput.placeholder = phoneNumberPlaceholder;
+            
+            /* @tweakable The text alignment for the phone number input field's placeholder. Can be 'right', 'left', or 'center'. */
+            const phoneNumberTextAlign = 'right';
+            dom.phoneNumberInput.style.textAlign = phoneNumberTextAlign;
+            
             dom.phoneNumberInput.maxLength = phoneNumberLength;
             dom.phoneNumberInput.pattern = `[0-9]{${phoneNumberLength}}`;
             dom.phoneNumberInput.title = `الرجاء إدخال ${phoneNumberLength} أرقام فقط`;
@@ -218,11 +247,15 @@
         }
 
         // Add a listener to update the message visibility whenever data is synced
-        window.addEventListener('datasync', updateFirstPlaylistMessageVisibility);
+        window.addEventListener('datasync', function() {
+            updateFirstPlaylistMessageVisibility();
+            updateUserDisplay(); // Update admin stats on sync
+        });
 
         // --- Initial Load ---
         window.initializePage();
         window.resetForm(); // Reset form initially to set it up correctly (e.g., add first song field)
+        
         window.showForm(false); // Then hide it
         
         // Start real-time synchronization
