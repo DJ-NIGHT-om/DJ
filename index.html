@@ -1,6 +1,5 @@
 <html lang="ar" dir="rtl">
 <head>
-  <link rel="icon" href="logo1.png" type="image/png">
     <link rel="icon" href="logo1.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -9,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="منسق الحفلات">
     <meta name="theme-color" content="#4a90e2">
-    <meta name="description" content="أنشئ قوائم المناسبات الخاصة بك بكل سهولة">
+    <meta name="description" content="أنشئ قوائم المناسبات  الخاصة بك بكل سهولة">
     <meta name="keywords" content="حفلات, منسق, أغاني, زفاف, مناسبات">
     <meta name="author" content="منسق الحفلات">
     <link rel="manifest" href="./manifest.json">
@@ -25,7 +24,7 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=fetch,Promise,Object.assign,Array.from"></script>
     <script>
         // Websim socket for real-time communication
-        if (typeof WebsimSocket === 'undefined') {
+        if (!window.WebsimSocket) {
             const socketScript = document.createElement('script');
             socketScript.src = "https://cdn.jsdelivr.net/npm/websim-socket@1.0.3/websim-socket.js";
             document.head.appendChild(socketScript);
@@ -66,8 +65,7 @@
                 </button>
             </div>
             <div id="first-playlist-message" class="first-playlist-message hidden">
-                <p><strong>https://wa.me/99383859 سيتم تلبية طلباتكم و التواصل معكم اذا الهاتف مسجل أو التواصل معنا لتكملة إجراءات الحفل</strong></p>
-            </div>
+                <p><strong>سيتم تلبية طلباتكم والتواصل معكم إذا كان الهاتف مسجلًا أو التواصل معنا  <a href="https://wa.me/96899383859" target="_blank">واتساب</a> لإكمال إجراءات الحفل</strong></p>
         </header>
 
         <div class="actions-container">
@@ -155,11 +153,6 @@
         if (preventContextMenu) {
             document.addEventListener('contextmenu', e => e.preventDefault());
         }
-    </script>
-    <script>
-      /* @tweakable The duration of the card fade-out animation in milliseconds when deleting a playlist. */
-      const cardDeleteAnimationDuration = 300;
-      window.cardDeleteAnimationDuration = cardDeleteAnimationDuration;
     </script>
     <script src="config.js" defer></script>
     <script src="modal.js" defer></script>

@@ -437,19 +437,6 @@ input:focus, textarea:focus {
     background-color: var(--danger-color);
 }
 
-/* Add a class for the deleting animation */
-.card-deleting {
-    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
-    transform: scale(0.95);
-    opacity: 0;
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    overflow: hidden;
-}
-
 /* Song input styles */
 .songs-section {
     margin-top: 1.5rem;
@@ -545,7 +532,8 @@ input:focus, textarea:focus {
 .day-name-display {
     color: var(--primary-color);
     font-weight: bold;
-    font-size: 1.0rem;
+    /* @tweakable The font size for the Arabic day name display in the form. */
+    font-size: 1.1rem;
     background: linear-gradient(45deg, var(--primary-color), blue);
     -webkit-background-clip: text;
     background-clip: text;
@@ -557,7 +545,9 @@ input:focus, textarea:focus {
 }
 
 .playlist-card-header .day-name {
+    /* @tweakable The color of the Arabic day name text inside a playlist card. */
     color: var(--secondary-color);
+    /* @tweakable The font size of the Arabic day name text inside a playlist card. */
     font-size: 1.0rem;
     font-weight: normal;
     margin-right: 5px;

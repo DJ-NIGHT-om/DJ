@@ -168,23 +168,33 @@
 
         /**
          * Shows or hides the message that appears after the first playlist is created for a specific duration.
+         * The message is hidden for administrators.
          */
         function updateFirstPlaylistMessageVisibility() {
+            /* @tweakable Set to false to show the "first playlist" message to admin users. */
+            const hideMessageForAdmin = true;
             const firstPlaylistMessage = document.getElementById('first-playlist-message');
-            if (firstPlaylistMessage) {
-                const creationTime = localStorage.getItem('firstPlaylistCreationTime');
-                if (!creationTime) {
-                    firstPlaylistMessage.classList.add('hidden');
-                    return;
-                }
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
-                const currentTime = new Date().getTime();
-                const timeElapsed = currentTime - parseInt(creationTime, 10);
-                const durationMs = firstPlaylistMessageDurationMinutes * 60 * 1000;
-
-                const shouldBeVisible = timeElapsed < durationMs;
-                firstPlaylistMessage.classList.toggle('hidden', !shouldBeVisible);
+            if (!firstPlaylistMessage) return;
+            
+            if (hideMessageForAdmin && isAdmin) {
+                firstPlaylistMessage.classList.add('hidden');
+                return;
             }
+
+            const creationTime = localStorage.getItem('firstPlaylistCreationTime');
+            if (!creationTime) {
+                firstPlaylistMessage.classList.add('hidden');
+                return;
+            }
+
+            const currentTime = new Date().getTime();
+            const timeElapsed = currentTime - parseInt(creationTime, 10);
+            const durationMs = firstPlaylistMessageDurationMinutes * 60 * 1000;
+
+            const shouldBeVisible = timeElapsed < durationMs;
+            firstPlaylistMessage.classList.toggle('hidden', !shouldBeVisible);
         }
 
         if (dom.phoneNumberInput) {
