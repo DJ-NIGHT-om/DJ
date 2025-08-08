@@ -135,44 +135,20 @@ function doPost(e) {
         }
         return ContentService.createTextOutput(JSON.stringify({status: 'success', message: `${deletedCount} rows archived.`})).setMimeType(ContentService.MimeType.JSON);
         
-     } else if (data.action === 'add' || data.action === 'edit') {
-    const timezone = 'GMT+4';
-    const now = new Date();
-    
-    // دالة موحدة لإنشاء التنسيق المطلوب
-    function createArabicDateTime(dateInput, includeTime = true) {
-        const dateObj = dateInput ? new Date(dateInput) : new Date();
-        
-        // تحويل اليوم للعربية
-        const arabicDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-        const dayName = arabicDays[dateObj.getDay()];
-        
-        // تنسيق التاريخ والوقت
-        const formattedDate = Utilities.formatDate(dateObj, timezone, 'dd/MM/yyyy');
-        const formattedTime = Utilities.formatDate(dateObj, timezone, 'HH:mm:ss');
-        
-        // بناء الناتج النهائي حسب الطلب
-        return includeTime 
-            ? `${dayName} - ${formattedDate} - ${formattedTime}`
-            : `${dayName} - ${formattedDate}`;
-    }
+    } else if (data.action === 'add' || data.action === 'edit') {
+        const rowData = {
+            id: data.id || new Date().getTime().toString(),
+            date: data.date,
+            location: data.location,
+            phoneNumber: data.phoneNumber,
+            brideZaffa: data.brideZaffa,
+            groomZaffa: data.groomZaffa,
+            songs: JSON.stringify(data.songs || []),
+            notes: data.notes || '',
+            username: data.username || '',
+            password: data.password || ''
+        };
 
-    const rowData = {
-        id: data.id || new Date().getTime().toString(),
-        date: createArabicDateTime(data.date, false), // التاريخ بدون وقت
-        location: data.location,
-        phoneNumber: data.phoneNumber,
-        brideZaffa: data.brideZaffa,
-        groomZaffa: data.groomZaffa,
-        songs: JSON.stringify(data.songs || []),
-        notes: data.notes || '',
-        username: data.username || '',
-        password: data.password || '',
-        submissionDateTime: createArabicDateTime(now, true), // التاريخ مع الوقت
-        songStatuses: data.songStatuses || '{}'
-    };
-
-    // ... باقي الكود كما هو
         const rowAsArray = headers.map(header => rowData[header]);
 
         if (data.action === 'edit') {
