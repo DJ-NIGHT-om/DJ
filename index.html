@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="منسق الحفلات">
     <meta name="theme-color" content="#4a90e2">
-    <meta name="description" content="أنشئ قوائم التشغيل والمناسبات الخاصة بك بكل سهولة">
+    <meta name="description" content="أنشئ قوائم المناسبات الخاصة بك بكل سهولة">
     <meta name="keywords" content="حفلات, منسق, أغاني, زفاف, مناسبات">
     <meta name="author" content="منسق الحفلات">
     <link rel="manifest" href="./manifest.json">
@@ -57,7 +57,7 @@
     <div class="container">
         <header>
             <h1><img src="logo.png" alt="شعار منسق الحفلات" class="header-logo"><i class="fas fa-magic-wand-sparkles"></i> منسق الحفلات</h1>
-            <p>أنشئ قوائم التشغيل والمناسبات الخاصة بك بكل سهولة</p>
+            <p>أنشئ قوائم المناسبات الخاصة بك بكل سهولة</p>
             <div class="user-info">
                 <span id="current-user-display"></span>
                 <a href="user.html" id="show-archive-btn" class="submit-btn header-btn"><i class="fas fa-archive"></i> الأرشيف</a>
@@ -71,12 +71,12 @@
         </header>
 
         <div class="actions-container">
-            <button id="show-form-btn" class="submit-btn green-btn"><i class="fas fa-plus-circle"></i> إنشاء  مناسبة جديدة</button>
+            <button id="show-form-btn" class="submit-btn green-btn"><i class="fas fa-plus-circle"></i> إنشاء مناسبة جديدة</button>
         </div>
 
         <main>
             <div id="form-section" class="form-container card hidden">
-                <h2 id="form-title"><i class="fas fa-plus-circle"></i> إضافة قائمة جديدة</h2>
+                <h2 id="form-title"><i class="fas fa-plus-circle"></i> إضافة مناسبة جديدة</h2>
                 <form id="playlist-form">
                     <input type="hidden" id="playlistId">
                     <div class="form-group">
@@ -107,7 +107,7 @@
                     </div>
                     
                     <div class="songs-section">
-                        <h3><i class="fas fa-music icon"></i>الأغاني المطلوبة للسحب</h3>
+                        <h3><i class="fas fa-music icon"></i>الأغاني المطلوبة بدون_موسيقى</h3>
                         <div id="songs-container">
                             <!-- Song input fields will be added here dynamically -->
                         </div>
@@ -127,7 +127,7 @@
             </div>
 
             <div class="list-container">
-                <h2><i class="fas fa-list-ul"></i> القوائم المحفوظة</h2>
+                <h2><i class="fas fa-list-ul"></i> المناسبات المحفوظة</h2>
                 <div id="playlist-section">
                     <!-- Playlist cards will be dynamically inserted here -->
                 </div>
