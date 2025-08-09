@@ -238,7 +238,6 @@
         dom.playlistForm.reset();
         dom.songsContainer.innerHTML = '';
         dom.playlistIdInput.value = '';
-        document.getElementById('originalUsername').value = '';
         dom.notesInput.value = '';
         dom.formTitle.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة قائمة جديدة';
         dom.saveBtn.textContent = 'حفظ البيانات';
@@ -272,15 +271,15 @@
         dom.saveBtn.textContent = 'حفظ التعديلات';
         dom.playlistIdInput.value = playlist.id;
 
-        // For admin edits, store the original username to preserve it on save
-        if (localStorage.getItem('isAdmin') === 'true') {
-            document.getElementById('originalUsername').value = playlist.username || '';
-        }
-
+        // The stored date is a 'YYYY-MM-DD' string, which new Date() interprets as local time.
+        // We need to treat it as a UTC date to avoid timezone shifts.
         var eventDate = new Date(playlist.date);
         if (!isNaN(eventDate.getTime())) {
-            eventDate.setMinutes(eventDate.getMinutes() - eventDate.getTimezoneOffset());
-            dom.eventDateInput.value = eventDate.toISOString().split('T')[0];
+            // By using UTC methods, we ensure the date string is correctly reconstructed regardless of browser timezone.
+            const yyyy = eventDate.getUTCFullYear();
+            const mm = String(eventDate.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(eventDate.getUTCDate()).padStart(2, '0');
+            dom.eventDateInput.value = `${yyyy}-${mm}-${dd}`;
             updateDayNameDisplay(dom.eventDateInput, dom.dayNameDisplay);
         } else {
             dom.eventDateInput.value = '';

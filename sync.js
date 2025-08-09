@@ -2,8 +2,8 @@
 (function() {
     'use strict';
     
-    /* @tweakable The delay in milliseconds between each background data sync. (e.g., 3000 = 3 seconds) */
-    const syncFrequency = 3000;
+    /* @tweakable The delay in milliseconds between each background data sync. A lower value means faster updates but more server requests. (e.g., 2500 = 2.5 seconds) */
+    const syncFrequency = 2500;
     var syncInterval;
     var allPlaylists = [];
     var allSheetData = []; // To store all data from the sheet for date checking
@@ -14,7 +14,6 @@
      */
     function syncDataFromSheet() {
         var currentUser = localStorage.getItem('currentUser');
-        var isAdmin = localStorage.getItem('isAdmin') === 'true';
         if (!currentUser) return Promise.resolve();
 
         // Prevent excessive sync calls
@@ -28,21 +27,15 @@
             .then(function(data) {
                 allSheetData = data; // Store all fetched data
 
-                var userPlaylists;
-                if (isAdmin) {
-                    // Admin sees all playlists, but we should still filter out rows that are just user accounts
-                    userPlaylists = data.filter(function(playlist) {
-                        return playlist.date && playlist.date.trim() !== '';
-                    });
-                } else {
-                    // Filter data for current user only
-                    userPlaylists = data.filter(function(playlist) {
-                        return playlist.username === currentUser;
-                    });
-                }
+                // Filter data for current user only
+                var userPlaylists = data.filter(function(playlist) {
+                    return playlist.username === currentUser;
+                });
 
                 var today = new Date();
                 today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+                // Use the new timezone-aware "today" for archiving logic
+                var appToday = window.getAppToday();
 
                 var currentPlaylists = [];
                 var playlistsToArchive = [];
@@ -64,10 +57,11 @@
                     }
                     
                     var eventDate = new Date(playlist.date);
-                    eventDate.setHours(0, 0, 0, 0); // Set to start of event date for comparison
+                    // This creates a date at midnight UTC, which is what we want for comparison
+                    var eventDateUTC = new Date(eventDate.getUTCFullYear(), eventDate.getUTCMonth(), eventDate.getUTCDate());
 
-                    if (!isNaN(eventDate.getTime()) && eventDate < today) {
-                        // This should be archived (date is in the past)
+                    if (!isNaN(eventDateUTC.getTime()) && eventDateUTC < appToday) {
+                        // This should be archived (date is in the past based on app timezone)
                         if (!localArchiveIds[playlist.id.toString()]) {
                             playlistsToArchive.push(playlist);
                         } else {
@@ -208,46 +202,6 @@
     }
 
     /**
-     * Updates or adds a playlist in the local `allPlaylists` array and re-renders the UI.
-     * @param {object} playlistData - The full playlist object to add or update.
-     */
-    function updateLocalPlaylist(playlistData) {
-        if (!playlistData || !playlistData.id) return;
-
-        let playlists = getAllPlaylists();
-        const index = playlists.findIndex(p => p.id.toString() === playlistData.id.toString());
-
-        if (index > -1) {
-            // Update existing
-            playlists[index] = playlistData;
-        } else {
-            // Add new
-            playlists.push(playlistData);
-        }
-
-        // Sort and re-render
-        allPlaylists = playlists.sort((a, b) => new Date(a.date) - new Date(b.date));
-        const dom = window.getDOMElements();
-        if (dom.playlistSection) {
-            window.renderPlaylists(dom.playlistSection, allPlaylists);
-        }
-        window.dispatchEvent(new CustomEvent('datasync')); // Notify other components
-    }
-
-    /**
-     * Removes a playlist from the local `allPlaylists` array.
-     * This is called after a successful optimistic delete from the server.
-     * @param {string} playlistId - The ID of the playlist to remove.
-     */
-    function removeLocalPlaylist(playlistId) {
-        if (!playlistId) return;
-        allPlaylists = allPlaylists.filter(p => p.id.toString() !== playlistId.toString());
-        // The card is already removed from the DOM, so no re-render is needed here,
-        // just update the underlying data array.
-        window.dispatchEvent(new CustomEvent('datasync')); // To update admin stats
-    }
-
-    /**
      * Stores playlists in local storage and sends a request to delete them from the sheet.
      * @param {Array} playlistsToArchive - An array of playlist objects to archive.
      */
@@ -290,6 +244,24 @@
     function getAllSheetData() {
         return allSheetData;
     }
+    
+    /**
+     * Updates the local playlist array and re-renders the UI.
+     * @param {Array} newPlaylists - The new array of playlists.
+     */
+    function updateLocalPlaylists(newPlaylists) {
+        // Sort playlists by date before updating the global state and UI
+        allPlaylists = newPlaylists.sort(function(a, b) {
+            return new Date(a.date) - new Date(b.date);
+        });
+
+        if (window.location.pathname.indexOf('index.html') !== -1 || window.location.pathname === '/') {
+            var dom = window.getDOMElements();
+            if (dom.playlistSection) {
+                window.renderPlaylists(dom.playlistSection, allPlaylists);
+            }
+        }
+    }
 
     // Make functions globally accessible
     window.syncDataFromSheet = syncDataFromSheet;
@@ -299,6 +271,5 @@
     window.archivePlaylists = archivePlaylists;
     window.getAllPlaylists = getAllPlaylists;
     window.getAllSheetData = getAllSheetData;
-    window.updateLocalPlaylist = updateLocalPlaylist;
-    window.removeLocalPlaylist = removeLocalPlaylist;
+    window.updateLocalPlaylists = updateLocalPlaylists;
 })();

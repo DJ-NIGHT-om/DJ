@@ -9,8 +9,6 @@
      * @returns {HTMLElement} The card element.
      */
     function createPlaylistCard(playlist, isArchived) {
-        var isAdmin = localStorage.getItem('isAdmin') === 'true';
-
         var songs = [];
         try {
             if (typeof playlist.songs === 'string' && playlist.songs.trim().startsWith('[')) {
@@ -29,13 +27,6 @@
             'تاريخ غير محدد';
         
         var dayName = !isNaN(eventDate.getTime()) ? window.getArabicDayName(eventDate) : '';
-
-        /* @tweakable The label for the username field shown in the admin view. */
-        const adminUsernameLabel = "صاحب الطلب:";
-        var adminInfoHtml = '';
-        if (isAdmin && playlist.username) {
-            adminInfoHtml = '<p class="admin-info"><i class="fas fa-user-shield icon"></i> <strong>' + adminUsernameLabel + '</strong> ' + playlist.username + '</p>';
-        }
 
         var actionsHtml = isArchived ?
             '<button class="action-btn delete-btn single-delete-btn"><i class="fas fa-trash-alt"></i> حذف من الأرشيف</button>' :
@@ -58,7 +49,6 @@
                 (dayName ? ' <span class="day-name">' + dayName + '</span>' : '') + '</span>' +
             '</div>' +
             '<div class="playlist-card-info">' +
-                adminInfoHtml +
                 '<p><i class="fas fa-phone icon"></i> <strong>رقم الهاتف:</strong> ' + (playlist.phoneNumber || 'غير محدد') + '</p>' +
                 '<p><i class="fas fa-female icon"></i> <strong>زفة العروس:</strong> ' + (playlist.brideZaffa || 'غير محدد') + '</p>' +
                 '<p><i class="fas fa-male icon"></i> <strong>زفة المعرس:</strong> ' + (playlist.groomZaffa || 'غير محدد') + '</p>' +

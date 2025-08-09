@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <link rel="icon" href="logo1.png" type="image/png">
@@ -8,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="منسق الحفلات">
     <meta name="theme-color" content="#4a90e2">
-    <meta name="description" content="أنشئ قوائم المناسبات  الخاصة بك بكل سهولة">
+    <meta name="description" content="أنشئ قوائم التشغيل والمناسبات الخاصة بك بكل سهولة">
     <meta name="keywords" content="حفلات, منسق, أغاني, زفاف, مناسبات">
     <meta name="author" content="منسق الحفلات">
     <link rel="manifest" href="./manifest.json">
@@ -56,7 +57,7 @@
     <div class="container">
         <header>
             <h1><img src="logo.png" alt="شعار منسق الحفلات" class="header-logo"><i class="fas fa-magic-wand-sparkles"></i> منسق الحفلات</h1>
-            <p>أنشئ قوائم المناسبات الخاصة بك بكل سهولة</p>
+            <p>أنشئ قوائم التشغيل والمناسبات الخاصة بك بكل سهولة</p>
             <div class="user-info">
                 <span id="current-user-display"></span>
                 <a href="user.html" id="show-archive-btn" class="submit-btn header-btn"><i class="fas fa-archive"></i> الأرشيف</a>
@@ -65,11 +66,12 @@
                 </button>
             </div>
             <div id="first-playlist-message" class="first-playlist-message hidden">
-                <p><strong>تهانينا .. لقد تم إنشاء قائمة المناسبة بنجاح ، سيتم تلبية طلباتكم ، يرجى التواصل معنا  <a href="https://wa.me/96899383859" target="_blank">واتساب</a> لإكمال إجراءات الحفل</strong></p>
+                 <p><strong>تهانينا .. لقد تم إنشاء قائمة المناسبة بنجاح ، سيتم تلبية طلباتكم ، يرجى التواصل معنا  <a href="https://wa.me/96899" target="_blank">واتساب</a> لإكمال إجراءات الحفل</strong></p>
+            </div>
         </header>
 
         <div class="actions-container">
-            <button id="show-form-btn" class="submit-btn green-btn"><i class="fas fa-plus-circle"></i> إنشاء مناسبة  جديدة</button>
+            <button id="show-form-btn" class="submit-btn green-btn"><i class="fas fa-plus-circle"></i> إنشاء  مناسبة جديدة</button>
         </div>
 
         <main>
@@ -77,7 +79,6 @@
                 <h2 id="form-title"><i class="fas fa-plus-circle"></i> إضافة قائمة جديدة</h2>
                 <form id="playlist-form">
                     <input type="hidden" id="playlistId">
-                    <input type="hidden" id="originalUsername">
                     <div class="form-group">
                         <label for="eventDate"><i class="fas fa-calendar-alt icon"></i> تاريخ المناسبة</label>
                         <div class="date-input-container">
@@ -91,9 +92,11 @@
                         <input type="text" id="eventLocation" required class="auto-expand-input" placeholder="أدخل اسم القاعة أو الإستراحة هنا...">
                     </div>
                     <div class="form-group">
-                        <label for="phoneNumber"><i class="fas fa-phone icon"></i> رقم الهاتف لمتابعة الطلب</label>
-                        <input type="tel" id="phoneNumber" pattern="[0-9]{8}" maxlength="8" inputmode="tel" title="الرجاء إدخال 8 أرقام فقط">
-                    </div>
+    <label for="phoneNumber"><i class="fas fa-phone icon"></i> رقم الهاتف لمتابعة الطلب <span class="optional-hint">.</span></label>
+    <input type="tel" id="phoneNumber" pattern="[0-9]{8}" maxlength="8" inputmode="tel" 
+           title="الرجاء إدخال 8 أرقام فقط" placeholder="الهاتف اختياري" 
+           class="auto-expand-input phone-input">
+</div>
                     <div class="form-group">
                         <label for="brideZaffa"><i class="fas fa-female icon"></i> اسم زفة العروس</label>
                         <input type="text" id="brideZaffa" required class="auto-expand-input" placeholder="أدخل اسم زفة العروس هنا...">
@@ -149,20 +152,28 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script>
         /* @tweakable Setting to true will disable the right-click context menu. */
-        const preventContextMenu = true;
+        const preventContextMenu = false;
         if (preventContextMenu) {
             document.addEventListener('contextmenu', e => e.preventDefault());
         }
     </script>
-    <script src="config.js" defer></script>
-    <script src="modal.js" defer></script>
-    <script src="api.js" defer></script>
-    <script src="ui.js" defer></script>
-    <script src="form.js" defer></script>
-    <script src="view.js" defer></script>
-    <script src="sync.js" defer></script>
-    <script src="playlist.js" defer></script>
-    <script src="effects.js" defer></script>
-    <script src="main.js" defer></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js",
+          "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"
+        }
+      }
+    </script>
+    <script src="config.js"></script>
+    <script src="modal.js"></script>
+    <script src="api.js"></script>
+    <script src="sync.js"></script>
+    <script src="ui.js"></script>
+    <script src="form.js"></script>
+    <script src="view.js"></script>
+    <script src="playlist.js"></script>
+    <script src="effects.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>

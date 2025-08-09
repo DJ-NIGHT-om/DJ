@@ -1,4 +1,23 @@
 /* Component styles - cards, forms, modals */
+.optional-hint {
+    color: #666;
+    font-size: 0.85em;
+    margin-right: 5px;
+}
+
+.phone-input {
+    text-align: right;
+    direction: ltr;
+    padding-left: 10px;
+   
+}
+
+.phone-input::placeholder {
+    color: #8E7B7B;
+    text-align: right;
+}
+
+
 
 .card {
     background-color: var(--card-bg-color);
@@ -241,6 +260,21 @@ input:focus, textarea:focus {
   
 }
 
+.playlist-card.deleting {
+    animation: fadeOutAndShrink 0.3s ease-out forwards;
+}
+
+@keyframes fadeOutAndShrink {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
 .playlist-card.selected {
     border-right-color: var(--secondary-color) !important;
     box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3) !important;
@@ -329,19 +363,6 @@ input:focus, textarea:focus {
     font-weight: bold;
    background-color: #E3FCE0;
    
-}
-
-/* Style for admin-only username display */
-.playlist-card-info .admin-info {
-    background-color: #fef2f2; /* Lighter red */
-    color: #991b1b; /* Darker red text */
-    padding: 0.5rem;
-    border-radius: 4px;
-    border-right: 3px solid #fca5a5; /* Red border */
-}
-
-.playlist-card-info .admin-info strong {
-    color: #991b1b;
 }
 
 .playlist-card-info p strong {
@@ -532,8 +553,7 @@ input:focus, textarea:focus {
 .day-name-display {
     color: var(--primary-color);
     font-weight: bold;
-    /* @tweakable The font size for the Arabic day name display in the form. */
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     background: linear-gradient(45deg, var(--primary-color), blue);
     -webkit-background-clip: text;
     background-clip: text;
@@ -545,9 +565,7 @@ input:focus, textarea:focus {
 }
 
 .playlist-card-header .day-name {
-    /* @tweakable The color of the Arabic day name text inside a playlist card. */
     color: var(--secondary-color);
-    /* @tweakable The font size of the Arabic day name text inside a playlist card. */
     font-size: 1.0rem;
     font-weight: normal;
     margin-right: 5px;

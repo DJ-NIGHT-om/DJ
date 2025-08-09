@@ -49,36 +49,16 @@
 
         // Check if user is logged in
         var currentUser = localStorage.getItem('currentUser');
-        var isAdmin = localStorage.getItem('isAdmin') === 'true';
         if (!currentUser) {
             window.location.href = 'login.html';
             return;
         }
 
-        /**
-         * Updates the user display message. This is called on initial load and after data sync.
-         */
-        function updateUserDisplay() {
-            var userDisplay = document.getElementById('current-user-display');
-            if (userDisplay) {
-                if (isAdmin) {
-                    const activePlaylists = window.getAllPlaylists() || [];
-                    const activeCount = activePlaylists.length;
-                    /* @tweakable The welcome message for the administrator. */
-                    const adminWelcomeMessage = 'أهلاً بالمدير';
-                    /* @tweakable The template for displaying the active playlist count for the admin. Use {count} as a placeholder. */
-                    const activeCountTemplate = '- عدد قواعد البيانات النشطة: {count}';
-                    userDisplay.textContent = `${adminWelcomeMessage} ${activeCountTemplate.replace('{count}', activeCount)}`;
-                } else {
-                     /* @tweakable The welcome message for a regular user. Use {user} as a placeholder. */
-                    const userWelcomeTemplate = 'مرحباً، {user}';
-                    userDisplay.textContent = userWelcomeTemplate.replace('{user}', currentUser);
-                }
-            }
+        // Display current user
+        var userDisplay = document.getElementById('current-user-display');
+        if (userDisplay) {
+            userDisplay.textContent = 'مرحباً، ' + currentUser;
         }
-        
-        // Display current user initially
-        updateUserDisplay();
 
         // Logout functionality
         var logoutBtn = document.getElementById('logout-btn');
@@ -98,7 +78,6 @@
                             localStorage.removeItem('currentUser');
                             localStorage.removeItem('currentUserPassword');
                             localStorage.removeItem('archivedPlaylists');
-                            localStorage.removeItem('isAdmin');
                             window.location.href = 'login.html';
                         }
                     });
@@ -125,6 +104,15 @@
             }
 
             var selectedDate = new Date(selectedDateValue);
+            /* @tweakable If true, allows selecting invalid dates in the form. Set to false to prevent errors. */
+            const allowInvalidDates = false;
+            if (!allowInvalidDates && isNaN(selectedDate.getTime())) {
+                // The date from the input is not a valid date.
+                // We can't proceed with checks. Silently return, or show a message.
+                // Returning silently is less intrusive if the user is in the middle of typing.
+                return;
+            }
+            
             var today = new Date();
             today.setHours(0, 0, 0, 0); // Set to start of today for comparison
 
@@ -154,6 +142,8 @@
                 }
                 
                 var playlistDate = new Date(playlist.date);
+                if (isNaN(playlistDate.getTime())) continue; // Skip invalid dates from data source
+                
                 playlistDate.setMinutes(playlistDate.getMinutes() + playlistDate.getTimezoneOffset());
                 var playlistDateString = playlistDate.toISOString().split('T')[0];
                 
@@ -168,44 +158,26 @@
 
         /**
          * Shows or hides the message that appears after the first playlist is created for a specific duration.
-         * The message is hidden for administrators.
          */
         function updateFirstPlaylistMessageVisibility() {
-            /* @tweakable Set to false to show the "first playlist" message to admin users. */
-            const hideMessageForAdmin = true;
             const firstPlaylistMessage = document.getElementById('first-playlist-message');
-            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            if (firstPlaylistMessage) {
+                const creationTime = localStorage.getItem('firstPlaylistCreationTime');
+                if (!creationTime) {
+                    firstPlaylistMessage.classList.add('hidden');
+                    return;
+                }
 
-            if (!firstPlaylistMessage) return;
-            
-            if (hideMessageForAdmin && isAdmin) {
-                firstPlaylistMessage.classList.add('hidden');
-                return;
+                const currentTime = new Date().getTime();
+                const timeElapsed = currentTime - parseInt(creationTime, 10);
+                const durationMs = firstPlaylistMessageDurationMinutes * 60 * 1000;
+
+                const shouldBeVisible = timeElapsed < durationMs;
+                firstPlaylistMessage.classList.toggle('hidden', !shouldBeVisible);
             }
-
-            const creationTime = localStorage.getItem('firstPlaylistCreationTime');
-            if (!creationTime) {
-                firstPlaylistMessage.classList.add('hidden');
-                return;
-            }
-
-            const currentTime = new Date().getTime();
-            const timeElapsed = currentTime - parseInt(creationTime, 10);
-            const durationMs = firstPlaylistMessageDurationMinutes * 60 * 1000;
-
-            const shouldBeVisible = timeElapsed < durationMs;
-            firstPlaylistMessage.classList.toggle('hidden', !shouldBeVisible);
         }
 
         if (dom.phoneNumberInput) {
-            /* @tweakable The placeholder text for the optional phone number field. */
-            const phoneNumberPlaceholder = "إختياري";
-            dom.phoneNumberInput.placeholder = phoneNumberPlaceholder;
-            
-            /* @tweakable The text alignment for the phone number input field's placeholder. Can be 'right', 'left', or 'center'. */
-            const phoneNumberTextAlign = 'right';
-            dom.phoneNumberInput.style.textAlign = phoneNumberTextAlign;
-            
             dom.phoneNumberInput.maxLength = phoneNumberLength;
             dom.phoneNumberInput.pattern = `[0-9]{${phoneNumberLength}}`;
             dom.phoneNumberInput.title = `الرجاء إدخال ${phoneNumberLength} أرقام فقط`;
@@ -257,15 +229,11 @@
         }
 
         // Add a listener to update the message visibility whenever data is synced
-        window.addEventListener('datasync', function() {
-            updateFirstPlaylistMessageVisibility();
-            updateUserDisplay(); // Update admin stats on sync
-        });
+        window.addEventListener('datasync', updateFirstPlaylistMessageVisibility);
 
         // --- Initial Load ---
         window.initializePage();
         window.resetForm(); // Reset form initially to set it up correctly (e.g., add first song field)
-        
         window.showForm(false); // Then hide it
         
         // Start real-time synchronization
