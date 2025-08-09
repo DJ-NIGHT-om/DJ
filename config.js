@@ -22,13 +22,104 @@ window.GAS_URL_ENDPOINT = GAS_URL_ENDPOINT;
 
 /* --- GOOGLE_APPS_SCRIPT_CODE --- (الصق هذا في محرر Apps Script)
 const SHEET_NAME = 'Sheet1'; // Or your sheet's name
+const BACKUP_SHEET_NAME = 'Backup'; // اسم ورقة النسخ الاحتياطي
 const SCRIPT_PROP = PropertiesService.getScriptProperties();
 
+/********** الإعداد الأساسي مع إضافة النسخ الاحتياطي **********/
 function setup() {
   const activeSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
   SCRIPT_PROP.setProperty('key', activeSheet.getParent().getId());
+  
+  // إنشاء ورقة النسخ الاحتياطي إذا لم تكن موجودة
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss.getSheetByName(BACKUP_SHEET_NAME)) {
+    const backupSheet = ss.insertSheet(BACKUP_SHEET_NAME);
+    const headers = activeSheet.getRange(1, 1, 1, activeSheet.getLastColumn()).getValues();
+    backupSheet.getRange(1, 1, 1, headers[0].length).setValues(headers);
+  }
+  
+  // إعداد المشغل التلقائي للنسخ الاحتياطي كل 3 ساعات بتوقيت دبي
+  setupBackupTrigger();
 }
 
+/********** دالة النسخ الاحتياطي التلقائي **********/
+function hourlyBackup() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sourceSheet = ss.getSheetByName(SHEET_NAME);
+    const backupSheet = ss.getSheetByName(BACKUP_SHEET_NAME);
+    
+    // الحصول على جميع البيانات من الورقة الرئيسية
+    const sourceData = sourceSheet.getDataRange().getValues();
+    const headers = sourceData[0];
+    
+    // مسح البيانات القديمة في ورقة النسخ الاحتياطي (مع الاحتفاظ بالعناوين)
+    backupSheet.clearContents();
+    backupSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    
+    // إذا كان هناك بيانات (أكثر من عنوان واحد)
+    if (sourceData.length > 1) {
+      // إضافة طابع زمني للنسخة الاحتياطية
+      const backupTimestamp = Utilities.formatDate(new Date(), 'Asia/Dubai', 'yyyy-MM-dd HH:mm:ss');
+      
+      // إضافة البيانات للنسخة الاحتياطية
+      backupSheet.getRange(2, 1, sourceData.length-1, headers.length).setValues(sourceData.slice(1));
+      
+      // إضافة عمود للطابع الزمني إذا لم يكن موجوداً
+      if (backupSheet.getLastColumn() <= headers.length) {
+        backupSheet.getRange(1, headers.length + 1).setValue('BackupTimestamp');
+      }
+      
+      // تعيين الطابع الزمني للبيانات المضافة
+      const timestampColumn = headers.length + 1;
+      const timestampValues = new Array(sourceData.length-1).fill([backupTimestamp]);
+      backupSheet.getRange(2, timestampColumn, sourceData.length-1, 1).setValues(timestampValues);
+    }
+    
+    console.log('تم إنشاء النسخة الاحتياطية بنجاح في: ' + new Date());
+  } catch (error) {
+    console.error('حدث خطأ أثناء إنشاء النسخة الاحتياطية:', error);
+  }
+}
+
+/********** إعداد المشغل التلقائي للنسخ الاحتياطي **********/
+function setupBackupTrigger() {
+  // حذف أي مشغلات موجودة مسبقاً لنفس الدالة
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => {
+    if (trigger.getHandlerFunction() === 'hourlyBackup') {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  
+  // إنشاء مشغل جديد كل 3 ساعات بتوقيت دبي
+  ScriptApp.newTrigger('hourlyBackup')
+    .timeBased()
+    .everyHours(3)
+    .inTimezone('Asia/Dubai')
+    .create();
+  
+  console.log('تم إعداد المشغل للنسخ الاحتياطي كل 3 ساعات بتوقيت دبي');
+}
+
+/********** دالة لإنشاء التاريخ والوقت بتوقيت دبي بالعربية **********/
+function createArabicDateTime(dateInput = null, includeTime = true) {
+  const timezone = 'Asia/Dubai';
+  const dateObj = dateInput ? new Date(dateInput) : new Date();
+  
+  const arabicDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const dayName = arabicDays[dateObj.getDay()];
+  const formattedDate = Utilities.formatDate(dateObj, timezone, 'dd/MM/yyyy');
+  
+  if (includeTime) {
+    const formattedTime = Utilities.formatDate(dateObj, timezone, 'HH:mm:ss');
+    return `${dayName}  ${formattedDate}  ${formattedTime}`;
+  } else {
+    return `${dayName}  ${formattedDate}`;
+  }
+}
+
+/********** دالة معالجة الطلبات (Web App) - معدلة مع الحفاظ على الدوال الأصلية **********/
 function doGet(e) {
   const sheet = SpreadsheetApp.openById(SCRIPT_PROP.getProperty('key')).getSheetByName(SHEET_NAME);
   const data = sheet.getDataRange().getValues();
@@ -81,11 +172,16 @@ function doPost(e) {
         }
       }
       
-      // Create new user entry
+      // Create new user entry with Arabic timestamp
       const newRow = new Array(headers.length).fill('');
       newRow[headers.indexOf('username')] = username;
       newRow[headers.indexOf('password')] = password;
       newRow[headers.indexOf('id')] = 'user_' + new Date().getTime();
+      
+      // إضافة التاريخ والوقت بالعربية إذا كان العمود موجوداً
+      if (headers.includes('submissionDateTime')) {
+        newRow[headers.indexOf('submissionDateTime')] = createArabicDateTime();
+      }
       
       sheet.appendRow(newRow);
       return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'User registered successfully'})).setMimeType(ContentService.MimeType.JSON);
@@ -110,7 +206,7 @@ function doPost(e) {
     } else if (data.action === 'delete') {
         const idToDelete = data.id;
         const idColumn = sheet.getRange("A:A").getValues();
-        for (let i = idColumn.length - 1; i >= 1; i--) { // Iterate backwards to avoid index shifts
+        for (let i = idColumn.length - 1; i >= 1; i--) {
             if (idColumn[i][0] == idToDelete) {
                 sheet.deleteRow(i + 1);
                 return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Row deleted'})).setMimeType(ContentService.MimeType.JSON);
@@ -118,16 +214,14 @@ function doPost(e) {
         }
         return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'ID not found'})).setMimeType(ContentService.MimeType.JSON);
 
-    } else if (data.action === 'archive') { // New action to handle archiving
+    } else if (data.action === 'archive') {
         const idsToDelete = data.ids;
         if (!idsToDelete || !Array.isArray(idsToDelete)) {
             return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Invalid IDs for archive'})).setMimeType(ContentService.MimeType.JSON);
         }
         const idColumn = sheet.getRange("A:A").getValues();
         let deletedCount = 0;
-        // Iterate backwards to avoid index shifts when deleting rows
         for (let i = idColumn.length - 1; i >= 1; i--) {
-            // Use .toString() to ensure correct type comparison
             if (idsToDelete.includes(idColumn[i][0].toString())) {
                 sheet.deleteRow(i + 1);
                 deletedCount++;
@@ -146,10 +240,11 @@ function doPost(e) {
             songs: JSON.stringify(data.songs || []),
             notes: data.notes || '',
             username: data.username || '',
-            password: data.password || ''
+            password: data.password || '',
+            submissionDateTime: createArabicDateTime()
         };
 
-        const rowAsArray = headers.map(header => rowData[header]);
+        const rowAsArray = headers.map(header => rowData[header] !== undefined ? rowData[header] : '');
 
         if (data.action === 'edit') {
              const idColumn = sheet.getRange("A:A").getValues();
@@ -166,7 +261,7 @@ function doPost(e) {
              } else {
                 return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'ID not found for update'})).setMimeType(ContentService.MimeType.JSON);
              }
-        } else { // add
+        } else {
             sheet.appendRow(rowAsArray);
             return ContentService.createTextOutput(JSON.stringify({status: 'success', data: rowData})).setMimeType(ContentService.MimeType.JSON);
         }
@@ -176,4 +271,8 @@ function doPost(e) {
     return ContentService.createTextOutput(JSON.stringify({status: 'error', message: error.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
-*/
+
+/********** دالة لاختبار النسخ الاحتياطي يدوياً **********/
+function testBackup() {
+  hourlyBackup();
+}
